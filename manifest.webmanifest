@@ -1,0 +1,29 @@
+{
+  "name": "Funzione Diastolica Nuragica",
+  "short_name": "Nuragica",
+  "description": "App PWA per stimare la funzione diastolica secondo le nuove linee guida 2025 (tutti gli scenari).",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#1e1b4b",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

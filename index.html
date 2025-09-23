@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a4078" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Funzione Diastolica Nuragica" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preload" href="style.css" as="style" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Funzione Diastolica Nuragica</title>
+  <meta name="description" content="Valuta la funzione diastolica e stima la LAP secondo l’algoritmo linee guida 2025, con percorsi per ritmo sinusale, FA e popolazioni speciali." />
+
+  
+
+
+  <!-- SPLASH START -->
+  <link rel="apple-touch-startup-image" href="assets/icons/splash-light-1242x2688.png" media="(prefers-color-scheme: light) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/splash-dark-1242x2688.png"  media="(prefers-color-scheme: dark)  and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/splash-light-1284x2778.png" media="(prefers-color-scheme: light) and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/splash-dark-1284x2778.png"  media="(prefers-color-scheme: dark)  and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/splash-light-1170x2532.png" media="(prefers-color-scheme: light) and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/splash-dark-1170x2532.png"  media="(prefers-color-scheme: dark)  and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+  <!-- SPLASH END -->
+
+</head>
+<body>
+  <header>
+    <h1>Funzione Diastolica Nuragica</h1>
+    <p>PWA per smartphone. Calcolo LAP & grading in ritmo sinusale e FA + note per popolazioni speciali (Tardìssimo style).</p>
+  </header>
+  <div class="container">
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" data-target="#sinus">Ritmo sinusale</div>
+        <div class="tab" data-target="#af">Fibrillazione atriale</div>
+        <div class="tab" data-target="#special">Popolazioni speciali</div>
+        <div class="tab" data-target="#about">Info</div>
+      </div>
+    </div>
+
+    <section id="sinus" class="section active card">
+      <h2>Algoritmo principale — Ritmo sinusale</h2>
+      <p class="badge">Cutoff delle nuove linee guida 2025</p>
+      <p>Inserisci le misure. L’algoritmo considera e′ (con soglie per età), E/e′, TR o PASP; se discordanti userà LARS, rapporto S/D venoso polmonare o LAVi e, se necessario, parametri supplementari.</p>
+
+      <div class="grid">
+        <div>
+          <label>Età (anni)</label>
+          <input id="age" type="number" min="18" max="110" placeholder="es. 58" />
+          <small class="hint">Usata per la soglia di e′ (Tabella di riferimento 2025).</small>
+        </div>
+        <div>
+          <label>Ritmo</label>
+          <select id="rhythm">
+            <option value="sinus">Sinusale</option>
+            <option value="af">Fibrillazione atriale (usa la tab dedicata)</option>
+          </select>
+        </div>
+
+        <div>
+          <label>e′ settale (cm/s)</label>
+          <input id="eprime_septal" type="number" step="0.1" placeholder="es. 5.8" />
+          <small class="hint">Soglie indicative: ≤6 (≥40 anni), ≤7 (20–39 anni).</small>
+        </div>
+        <div>
+          <label>e′ laterale (cm/s)</label>
+          <input id="eprime_lateral" type="number" step="0.1" placeholder="es. 7.2" />
+          <small class="hint">Soglie indicative: ≤7 (≥65 anni), ≤8 (40–65), ≤10 (20–39).</small>
+        </div>
+
+        <div>
+          <label>E/e′ medio</label>
+          <input id="ee_avg" type="number" step="0.1" placeholder="es. 15.2" />
+          <small class="hint">Anormale se ≥14 (medio) o ≥15 (settale) o ≥13 (laterale).</small>
+        </div>
+        <div>
+          <label>Velocità TR max (m/s)</label>
+          <input id="tr_vmax" type="number" step="0.01" placeholder="es. 2.9" />
+          <small class="hint">≥2.8 m/s suggerisce LAP ↑ se non PH parenchimale/vascolare.</small>
+        </div>
+
+        <div>
+          <label>PASP (mmHg)</label>
+          <input id="pasp" type="number" step="0.1" placeholder="es. 36" />
+          <small class="hint">≥35 mmHg suggerisce LAP ↑ (se stima RAP attendibile).</small>
+        </div>
+        <div>
+          <label>E/A</label>
+          <input id="ea_ratio" type="number" step="0.01" placeholder="es. 1.9" />
+          <small class="hint">Usato per distinguere grado 2 (E/A &lt; 2) vs grado 3 (E/A ≥ 2) se LAP ↑.</small>
+        </div>
+
+        <div>
+          <label>LARS (%)</label>
+          <input id="lars" type="number" step="0.1" placeholder="es. 15.5" />
+          <small class="hint">≤18% supporta LAP ↑ (stadio 2).</small>
+        </div>
+        <div>
+          <label>Rapporto S/D venoso polmonare</label>
+          <input id="pv_sd" type="number" step="0.01" placeholder="es. 0.6" />
+          <small class="hint">≤0.67 supporta LAP ↑.</small>
+        </div>
+
+        <div>
+          <label>LAVi (mL/m²)</label>
+          <input id="lavi" type="number" step="0.1" placeholder="es. 38" />
+          <small class="hint">&gt;34 mL/m² supporta LAP ↑ (uso come supporto).</small>
+        </div>
+        <div>
+          <label>IVRT (ms)</label>
+          <input id="ivrt" type="number" step="1" placeholder="es. 65" />
+          <small class="hint">≤70 ms può supportare LAP ↑ (alternativo).</small>
+        </div>
+
+        <div>
+          <label>Parametri supplementari (se disponibili)</label>
+          <select id="supp" multiple>
+            <option value="pr2">PR end‑diastolico ≥ 2 m/s</option>
+            <option value="padp16">PADP ≥ 16 mmHg</option>
+            <option value="lwave50">Onde L mitraliche ≥ 50 cm/s</option>
+            <option value="ar_a30">Ar–A durata &gt; 30 ms</option>
+            <option value="valsava50">Δ E/A ≥ 50% con Valsalva</option>
+          </select>
+          <small class="hint">Usati solo se fase 1–2 non conclusiva.</small>
+        </div>
+      </div>
+
+      <p style="margin-top:12px">
+        <button class="btn" id="calcSinus">Calcola</button>
+      </p>
+
+      <div id="sinusResult" class="status warn" style="display:none"></div>
+      <div id="sinusDetails" class="card" style="display:none"></div>
+    </section>
+
+    <section id="af" class="section card">
+      <h2>Algoritmo — Fibrillazione atriale</h2>
+      <p>Usa un approccio multiparametrico con accuratezza moderata; mediare diverse cicli rappresentativi.</p>
+
+      <div class="grid">
+        <div>
+          <label>Velocità E (cm/s)</label>
+          <input id="af_E" type="number" step="0.1" placeholder="es. 110" />
+          <small class="hint">≥100 cm/s = 1 criterio per LAP ↑.</small>
+        </div>
+        <div>
+          <label>Rapporto E/e′ settale</label>
+          <input id="af_ee_septal" type="number" step="0.1" placeholder="es. 12" />
+          <small class="hint">&gt;11 = 1 criterio.</small>
+        </div>
+        <div>
+          <label>TR max (m/s) o PASP (mmHg)</label>
+          <input id="af_tr" type="number" step="0.01" placeholder="TR es. 2.9" />
+          <small class="hint">≥2.8 m/s o PASP ≥35 mmHg = 1 criterio.</small>
+        </div>
+        <div>
+          <label>DT di E (ms)</label>
+          <input id="af_dt" type="number" step="1" placeholder="es. 150" />
+          <small class="hint">≤160 ms = 1 criterio.</small>
+        </div>
+        <div>
+          <label>LARS (%)</label>
+          <input id="af_lars" type="number" step="0.1" placeholder="es. 16" />
+          <small class="hint">≤18% supporto aggiuntivo.</small>
+        </div>
+        <div>
+          <label>Rapporto S/D venoso polmonare</label>
+          <input id="af_pv_sd" type="number" step="0.01" placeholder="es. 0.6" />
+          <small class="hint">≤0.67 supporto aggiuntivo.</small>
+        </div>
+      </div>
+
+      <p style="margin-top:12px">
+        <button class="btn" id="calcAF">Calcola</button>
+      </p>
+
+      <div id="afResult" class="status warn" style="display:none"></div>
+      <div id="afDetails" class="card" style="display:none"></div>
+    </section>
+
+    <section id="special" class="section card">
+      <h2>Popolazioni speciali (note operative)</h2>
+      <ul>
+        <li><strong>Valvulopatie (AS, AR, MR, MS):</strong> non usare l’algoritmo generale; considera PV Ar, Ar–A, LAVi, E/e′, TR/PASP e il contesto della valvulopatia.</li>
+        <li><strong>Trapianto cardiaco:</strong> algoritmo dedicato; evitare inferenze semplicistiche; includi PV flow, e′, TR/PASP.</li>
+        <li><strong>Ipertensione polmonare:</strong> usa <em>E/A</em> (≤0.8 → pre-capillare; ≥2 → post-capillare). Se 0.8&lt;E/A&lt;2: lateral E/e′&gt;13, LAVi&gt;34, LARS≤16% favoriscono gruppo II.</li>
+        <li><strong>Blocco AV/LBBB/Pacing:</strong> attenzione alla fusione E/A e a e′ alterate; affidarsi a TR/PASP, LAVi e, con cautela, LARS.</li>
+        <li><strong>Restrittiva/Amiloidosi:</strong> E/A&gt;2.5, DT&lt;150 ms, IVRT&lt;50 ms, e′ 3–4 cm/s, pattern apical-sparing; considerare “5‑5‑5”.</li>
+        <li><strong>Pericardite costrittiva:</strong> variazioni mitraliche/tricuspidali respiratorie, reversus, HVedr/ff ≥0.8, e′ mediale spesso &gt;7 cm/s.</li>
+        <li><strong>HCM:</strong> approccio comprensivo con mitrale, vene polmonari, e′, TR, LAVi; restrittivo + E/e′ ↑ si associa a outcome peggiori.</li>
+      </ul>
+      <p class="hint">Per scenari esclusi (LVAD, pericardite costrittiva, trapianto, non‑cardiac PH, MR severa/MS/moderato‑severa MAC, riparazione/sostituzione mitralica) non applicare l’algoritmo sinusale.</p>
+    </section>
+
+    <section id="about" class="section card">
+      <h2>Info & Limitazioni</h2>
+      <p>Questa app implementa in modo pratico le nuove linee guida 2025 per la stima della LAP a riposo in ritmo sinusale, un approccio multiparametrico in FA, e fornisce note per popolazioni speciali. Non sostituisce il giudizio clinico né l’emodinamica invasiva.</p>
+      <p>Installabile come PWA: apri il link in Safari su iPhone → “Condividi” → “Aggiungi alla schermata Home”. Funziona offline dopo il primo caricamento.</p>
+    </section>
+
+    <footer>
+      <div>© 2025 • DiastolicFX • MIT License</div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+  </script>
+</body>
+</html>

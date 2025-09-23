@@ -1,0 +1,47 @@
+:root{
+  --bg:#1e1b4b;       /* mirto indigo */
+  --ink:#0b1220;
+  --muted:#6b7280;
+  --card:#ffffff;
+  --accent:#0ea5a5;   /* mare turchese */
+  --ok:#16a34a;       /* macchia mediterranea */
+  --warn:#d97706;     /* sole sardo */
+  --bad:#dc2626;      /* rosso corallo */
+  --soft:#f5f7fb;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--soft);color:var(--ink)}
+header{background:linear-gradient(135deg,var(--bg),#103b66 60%);color:#fff;padding:16px 20px;position:sticky;top:0;z-index:5}
+header h1{font-size:20px;margin:0 0 4px}
+header p{margin:0;font-size:13px;opacity:.9}
+.container{max-width:920px;margin:18px auto;padding:0 12px}
+.card{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.06);padding:16px;margin:12px 0}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:800px){.grid{grid-template-columns:1fr 1fr}}
+label{display:block;font-weight:600;margin-bottom:6px}
+input,select{width:100%;padding:10px 12px;border:1px solid #e1e8f0;border-radius:12px;font-size:15px}
+small.hint{display:block;color:var(--muted);margin-top:4px}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2f8;color:#27364a;font-size:12px;margin-right:6px}
+.btn{display:inline-block;padding:10px 14px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-weight:700}
+.btn:disabled{opacity:.5}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
+.tab{flex:1 1 auto;text-align:center;padding:10px;border-radius:12px;background:#e8eef5;cursor:pointer;font-weight:700}
+.tab.active{background:#cfe9ff}
+.section{display:none}
+.section.active{display:block}
+.kv{display:flex;justify-content:space-between;margin:6px 0;padding:8px;background:#f9fbff;border-radius:10px;border:1px solid #eef3fa}
+.kv .k{color:var(--muted)}
+.status{padding:12px;border-radius:16px}
+.status.ok{background:#ecfdf5;border:1px solid #c7f0db}
+.status.warn{background:#fff7ed;border:1px solid #fde68a}
+.status.bad{background:#fef2f2;border:1px solid #fecaca}
+footer{padding:24px;color:var(--muted);text-align:center}
+hr{border:none;border-top:1px solid #eef2f7;margin:16px 0}
+code{background:#f4f7fb;padding:2px 6px;border-radius:6px}
+
+
+/* Tardìssimo polish */
+header{background:linear-gradient(135deg,var(--bg),#2b2468 60%);}
+.tab{background:linear-gradient(180deg,#eaf5ff,#e8eef5);}
+.btn{box-shadow:0 6px 16px rgba(14,165,165,.25)}
+.card{border:1px solid #eef2f7}
