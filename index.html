@@ -183,233 +183,133 @@
     </section>
 
     
-    <section id="special" class="section card">
-      <h2>Popolazioni speciali — Calcolatori</h2>
-      <div class="tabs" id="spTabs">
-        <div class="tab active" data-target="#sp_valv">Valvulopatie</div>
-        <div class="tab" data-target="#sp_htx">Trapianto cardiaco</div>
-        <div class="tab" data-target="#sp_ph">Ipertensione polmonare</div>
-        <div class="tab" data-target="#sp_block">Blocco/LBBB/Pacing</div>
-        <div class="tab" data-target="#sp_restr">Restrittiva/Amiloidosi</div>
-        <div class="tab" data-target="#sp_costr">Pericardite costrittiva</div>
-        <div class="tab" data-target="#sp_hcm">HCM</div>
-      </div>
+    
+<section id="special" class="section card">
+  <h2>Popolazioni speciali — Calcolatori</h2>
+  <div class="tabs" id="spTabs">
+    <div class="tab active" data-target="#sp_valv">Valvulopatie</div>
+    <div class="tab" data-target="#sp_htx">Trapianto</div>
+    <div class="tab" data-target="#sp_ph">Ipertensione polmonare</div>
+    <div class="tab" data-target="#sp_block">Blocco/LBBB/Pacing</div>
+    <div class="tab" data-target="#sp_restr">Restrittiva/Amiloidosi</div>
+    <div class="tab" data-target="#sp_costr">Pericardite costrittiva</div>
+    <div class="tab" data-target="#sp_hcm">HCM</div>
+  </div>
 
-      <!-- Valvulopatie -->
-      <div id="sp_valv" class="section active" style="margin-top:12px">
-        <div class="grid">
-          <div>
-            <label>Tipo valvulopatia</label>
-            <select id="valv_type">
-              <option value="AS">Stenosi Aortica (AS)</option>
-              <option value="AR">Insufficienza Aortica (AR)</option>
-              <option value="MR">Insufficienza Mitralica (MR)</option>
-              <option value="MS">Stenosi Mitralica (MS)</option>
-              <option value="MAC">MAC moderata-severa</option>
-            </select>
-            <small class="hint">Se MR severa, MS di qualunque grado o MAC moderata-severa, evitare algoritmi generali.</small>
-          </div>
-          <div>
-            <label>E/e′ medio</label>
-            <input id="valv_ee" type="number" step="0.1" placeholder="es. 15" />
-          </div>
-          <div>
-            <label>TR max (m/s)</label>
-            <input id="valv_tr" type="number" step="0.01" placeholder="es. 2.9" />
-          </div>
-          <div>
-            <label>PASP (mmHg)</label>
-            <input id="valv_pasp" type="number" step="0.1" placeholder="es. 40" />
-          </div>
-          <div>
-            <label>Rapporto S/D venoso polmonare</label>
-            <input id="valv_pv_sd" type="number" step="0.01" placeholder="es. 0.6" />
-          </div>
-          <div>
-            <label>LAVi (mL/m²)</label>
-            <input id="valv_lavi" type="number" step="0.1" placeholder="es. 40" />
-          </div>
-          <div>
-            <label>Ar–A (ms)</label>
-            <input id="valv_ar_a" type="number" step="1" placeholder="es. 40" />
-            <small class="hint">Se Ar–A &gt; 30 ms suggerisce LAP ↑.</small>
-          </div>
-        </div>
-        <p style="margin-top:12px"><button class="btn" id="calcValv">Calcola</button></p>
-        <div id="valvResult" class="status warn" style="display:none"></div>
-        <div id="valvDetails" class="card" style="display:none"></div>
-      </div>
+  <!-- Valvulopatie -->
+  <div id="sp_valv" class="section active">
+    <h3>Valvulopatie</h3>
+    <div class="grid">
+      <div><label>Tipo</label>
+        <select id="valv_type">
+          <option value="AS">AS</option><option value="AR">AR</option>
+          <option value="MR">MR</option><option value="MS">MS</option>
+          <option value="MAC">MAC</option>
+        </select></div>
+      <div><label>E/e′ medio</label><input id="valv_ee" type="number"></div>
+      <div><label>TR max (m/s)</label><input id="valv_tr" type="number"></div>
+      <div><label>PASP (mmHg)</label><input id="valv_pasp" type="number"></div>
+      <div><label>PV S/D</label><input id="valv_pv_sd" type="number"></div>
+      <div><label>LAVi</label><input id="valv_lavi" type="number"></div>
+      <div><label>Ar–A (ms)</label><input id="valv_ar_a" type="number"></div>
+    </div>
+    <button id="calcValv" class="btn">Calcola</button>
+    <div id="valvResult" class="status" style="display:none"></div>
+    <div id="valvDetails" class="card" style="display:none"></div>
+  </div>
 
-      <!-- Trapianto cardiaco -->
-      <div id="sp_htx" class="section" style="margin-top:12px">
-        <div class="grid">
-          <div>
-            <label>e′ medio (cm/s)</label>
-            <input id="htx_eprime" type="number" step="0.1" placeholder="es. 7.0" />
-          </div>
-          <div>
-            <label>E/e′ medio</label>
-            <input id="htx_ee" type="number" step="0.1" placeholder="es. 14.5" />
-          </div>
-          <div>
-            <label>TR max (m/s)</label>
-            <input id="htx_tr" type="number" step="0.01" placeholder="es. 2.8" />
-          </div>
-          <div>
-            <label>Rapporto S/D venoso polmonare</label>
-            <input id="htx_pv_sd" type="number" step="0.01" placeholder="es. 0.65" />
-          </div>
-          <div>
-            <label>LAVi (mL/m²)</label>
-            <input id="htx_lavi" type="number" step="0.1" placeholder="es. 36" />
-          </div>
-        </div>
-        <p style="margin-top:12px"><button class="btn" id="calcHtx">Calcola</button></p>
-        <div id="htxResult" class="status warn" style="display:none"></div>
-        <div id="htxDetails" class="card" style="display:none"></div>
-      </div>
+  <!-- Trapianto -->
+  <div id="sp_htx" class="section">
+    <h3>Trapianto cardiaco</h3>
+    <div class="grid">
+      <div><label>e′ medio</label><input id="htx_eprime" type="number"></div>
+      <div><label>E/e′</label><input id="htx_ee" type="number"></div>
+      <div><label>TR max</label><input id="htx_tr" type="number"></div>
+      <div><label>PV S/D</label><input id="htx_pv_sd" type="number"></div>
+      <div><label>LAVi</label><input id="htx_lavi" type="number"></div>
+    </div>
+    <button id="calcHtx" class="btn">Calcola</button>
+    <div id="htxResult" class="status" style="display:none"></div>
+    <div id="htxDetails" class="card" style="display:none"></div>
+  </div>
 
-      <!-- Ipertensione polmonare -->
-      <div id="sp_ph" class="section" style="margin-top:12px">
-        <div class="grid">
-          <div>
-            <label>E/A</label>
-            <input id="ph_ea" type="number" step="0.01" placeholder="es. 1.6" />
-            <small class="hint">≤0.8 → probabile pre-capillare; ≥2 → probabile post-capillare.</small>
-          </div>
-          <div>
-            <label>E/e′ laterale</label>
-            <input id="ph_ee_lat" type="number" step="0.1" placeholder="es. 14" />
-          </div>
-          <div>
-            <label>LAVi (mL/m²)</label>
-            <input id="ph_lavi" type="number" step="0.1" placeholder="es. 40" />
-          </div>
-          <div>
-            <label>LARS (%)</label>
-            <input id="ph_lars" type="number" step="0.1" placeholder="es. 16" />
-          </div>
-        </div>
-        <p style="margin-top:12px"><button class="btn" id="calcPH">Calcola</button></p>
-        <div id="phResult" class="status warn" style="display:none"></div>
-        <div id="phDetails" class="card" style="display:none"></div>
-      </div>
+  <!-- PH -->
+  <div id="sp_ph" class="section">
+    <h3>Ipertensione polmonare</h3>
+    <div class="grid">
+      <div><label>E/A</label><input id="ph_ea" type="number"></div>
+      <div><label>E/e′ lat</label><input id="ph_ee_lat" type="number"></div>
+      <div><label>LAVi</label><input id="ph_lavi" type="number"></div>
+      <div><label>LARS (%)</label><input id="ph_lars" type="number"></div>
+    </div>
+    <button id="calcPH" class="btn">Calcola</button>
+    <div id="phResult" class="status" style="display:none"></div>
+    <div id="phDetails" class="card" style="display:none"></div>
+  </div>
 
-      <!-- Blocco AV / LBBB / Pacing -->
-      <div id="sp_block" class="section" style="margin-top:12px">
-        <div class="grid">
-          <div>
-            <label>E/A</label>
-            <input id="block_ea" type="number" step="0.01" placeholder="es. 1.1" />
-            <small class="hint">Attenzione alla fusione E/A.</small>
-          </div>
-          <div>
-            <label>E/e′ medio</label>
-            <input id="block_ee" type="number" step="0.1" placeholder="es. 13.5" />
-          </div>
-          <div>
-            <label>TR max (m/s)</label>
-            <input id="block_tr" type="number" step="0.01" placeholder="es. 2.9" />
-          </div>
-          <div>
-            <label>LAVi (mL/m²)</label>
-            <input id="block_lavi" type="number" step="0.1" placeholder="es. 38" />
-          </div>
-          <div>
-            <label>LARS (%)</label>
-            <input id="block_lars" type="number" step="0.1" placeholder="es. 17" />
-          </div>
-        </div>
-        <p style="margin-top:12px"><button class="btn" id="calcBlock">Calcola</button></p>
-        <div id="blockResult" class="status warn" style="display:none"></div>
-        <div id="blockDetails" class="card" style="display:none"></div>
-      </div>
+  <!-- Blocco -->
+  <div id="sp_block" class="section">
+    <h3>Blocco AV / LBBB / Pacing</h3>
+    <div class="grid">
+      <div><label>E/A</label><input id="block_ea" type="number"></div>
+      <div><label>E/e′ medio</label><input id="block_ee" type="number"></div>
+      <div><label>TR max</label><input id="block_tr" type="number"></div>
+      <div><label>LAVi</label><input id="block_lavi" type="number"></div>
+      <div><label>LARS (%)</label><input id="block_lars" type="number"></div>
+    </div>
+    <button id="calcBlock" class="btn">Calcola</button>
+    <div id="blockResult" class="status" style="display:none"></div>
+    <div id="blockDetails" class="card" style="display:none"></div>
+  </div>
 
-      <!-- Restrittiva / Amiloidosi -->
-      <div id="sp_restr" class="section" style="margin-top:12px">
-        <div class="grid">
-          <div>
-            <label>E/A</label>
-            <input id="restr_ea" type="number" step="0.01" placeholder="es. 2.6" />
-          </div>
-          <div>
-            <label>DT (ms)</label>
-            <input id="restr_dt" type="number" step="1" placeholder="es. 140" />
-          </div>
-          <div>
-            <label>IVRT (ms)</label>
-            <input id="restr_ivrt" type="number" step="1" placeholder="es. 45" />
-          </div>
-          <div>
-            <label>e′ mediale (cm/s)</label>
-            <input id="restr_eprime_med" type="number" step="0.1" placeholder="es. 3.5" />
-          </div>
-          <div>
-            <label>Pattern apical‑sparing (GLS)</label>
-            <select id="restr_apex">
-              <option value="no">No</option>
-              <option value="si">Sì</option>
-            </select>
-          </div>
-        </div>
-        <p style="margin-top:12px"><button class="btn" id="calcRestr">Calcola</button></p>
-        <div id="restrResult" class="status warn" style="display:none"></div>
-        <div id="restrDetails" class="card" style="display:none"></div>
+  <!-- Restrittiva -->
+  <div id="sp_restr" class="section">
+    <h3>Restrittiva / Amiloidosi</h3>
+    <div class="grid">
+      <div><label>E/A</label><input id="restr_ea" type="number"></div>
+      <div><label>DT (ms)</label><input id="restr_dt" type="number"></div>
+      <div><label>IVRT (ms)</label><input id="restr_ivrt" type="number"></div>
+      <div><label>e′ mediale</label><input id="restr_eprime_med" type="number"></div>
+      <div><label>Apical sparing</label>
+        <select id="restr_apex"><option value="no">No</option><option value="si">Sì</option></select>
       </div>
+    </div>
+    <button id="calcRestr" class="btn">Calcola</button>
+    <div id="restrResult" class="status" style="display:none"></div>
+    <div id="restrDetails" class="card" style="display:none"></div>
+  </div>
 
-      <!-- Pericardite costrittiva -->
-      <div id="sp_costr" class="section" style="margin-top:12px">
-        <div class="grid">
-          <div>
-            <label>Variazione respiratoria mitralica (%)</label>
-            <input id="costr_resp_mitral" type="number" step="1" placeholder="es. 30" />
-          </div>
-          <div>
-            <label>Variazione respiratoria tricuspidale (%)</label>
-            <input id="costr_resp_tric" type="number" step="1" placeholder="es. 50" />
-          </div>
-          <div>
-            <label>e′ mediale (cm/s)</label>
-            <input id="costr_eprime_med" type="number" step="0.1" placeholder="es. 8.0" />
-          </div>
-          <div>
-            <label>Hepatic vein diastolic reversus (sì/no)</label>
-            <select id="costr_reversus">
-              <option value="no">No</option>
-              <option value="si">Sì</option>
-            </select>
-          </div>
-        </div>
-        <p style="margin-top:12px"><button class="btn" id="calcCostr">Calcola</button></p>
-        <div id="costrResult" class="status warn" style="display:none"></div>
-        <div id="costrDetails" class="card" style="display:none"></div>
+  <!-- Costrizione -->
+  <div id="sp_costr" class="section">
+    <h3>Pericardite costrittiva</h3>
+    <div class="grid">
+      <div><label>Δ mitralica (%)</label><input id="costr_resp_mitral" type="number"></div>
+      <div><label>Δ tricuspidale (%)</label><input id="costr_resp_tric" type="number"></div>
+      <div><label>e′ mediale</label><input id="costr_eprime_med" type="number"></div>
+      <div><label>Reversus epatico</label>
+        <select id="costr_reversus"><option value="no">No</option><option value="si">Sì</option></select>
       </div>
+    </div>
+    <button id="calcCostr" class="btn">Calcola</button>
+    <div id="costrResult" class="status" style="display:none"></div>
+    <div id="costrDetails" class="card" style="display:none"></div>
+  </div>
 
-      <!-- HCM -->
-      <div id="sp_hcm" class="section" style="margin-top:12px">
-        <div class="grid">
-          <div>
-            <label>E/e′ medio</label>
-            <input id="hcm_ee" type="number" step="0.1" placeholder="es. 15" />
-          </div>
-          <div>
-            <label>E/A</label>
-            <input id="hcm_ea" type="number" step="0.01" placeholder="es. 1.8" />
-          </div>
-          <div>
-            <label>LAVi (mL/m²)</label>
-            <input id="hcm_lavi" type="number" step="0.1" placeholder="es. 42" />
-          </div>
-          <div>
-            <label>TR max (m/s)</label>
-            <input id="hcm_tr" type="number" step="0.01" placeholder="es. 3.0" />
-          </div>
-        </div>
-        <p style="margin-top:12px"><button class="btn" id="calcHcm">Calcola</button></p>
-        <div id="hcmResult" class="status warn" style="display:none"></div>
-        <div id="hcmDetails" class="card" style="display:none"></div>
-      </div>
-    </section>
+  <!-- HCM -->
+  <div id="sp_hcm" class="section">
+    <h3>Cardiomiopatia ipertrofica (HCM)</h3>
+    <div class="grid">
+      <div><label>E/e′ medio</label><input id="hcm_ee" type="number"></div>
+      <div><label>E/A</label><input id="hcm_ea" type="number"></div>
+      <div><label>LAVi</label><input id="hcm_lavi" type="number"></div>
+      <div><label>TR max</label><input id="hcm_tr" type="number"></div>
+    </div>
+    <button id="calcHcm" class="btn">Calcola</button>
+    <div id="hcmResult" class="status" style="display:none"></div>
+    <div id="hcmDetails" class="card" style="display:none"></div>
+  </div>
+</section>
+
 
 
     <section id="about" class="section card">
