@@ -69,3 +69,18 @@ header{background:linear-gradient(135deg,var(--bg),#2b2468 60%);}
 [data-route]{ display:none; }
 [data-route].active{ display:block; }
 
+
+
+/* Route visibility hard lock */
+[data-route]{ display:none !important; }
+[data-route].active{ display:block !important; }
+
+
+
+/* Force-hide all top-level pages unless active */
+[data-route]{ display:none !important; }
+[data-route].active{ display:block !important; }
+
+/* Top tabs highlight */
+#rootTabs .tab.active{ border-bottom:2px solid var(--accent); font-weight:600; }
+

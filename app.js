@@ -816,3 +816,127 @@ document.getElementById('forceUpdateBtn')?.addEventListener('click', forceUpdate
   }
 })();
 
+
+
+// ===== Robust root tab routing (auto-detect tabs that target [data-route]) =====
+(function(){
+  const pages = Array.from(document.querySelectorAll('[data-route]'));
+  if(!pages.length) return;
+  const pageIds = new Set(pages.map(p => '#'+(p.id||'')));
+  // Tabs that actually point to top-level pages
+  const tabs = Array.from(document.querySelectorAll('.tab')).filter(t => pageIds.has(t.getAttribute('data-target')));
+  if(!tabs.length) return;
+
+  function show(id){
+    pages.forEach(p => p.classList.remove('active'));
+    const target = document.querySelector(id);
+    if(target){ target.classList.add('active'); window.scrollTo({top:0, behavior:'smooth'}); }
+    // toggle tab active state only among root tabs
+    tabs.forEach(t => t.classList.remove('active'));
+    const current = tabs.find(t => t.getAttribute('data-target')===id);
+    if(current) current.classList.add('active');
+  }
+
+  // ensure only one page visible at start
+  const active = pages.find(p => p.classList.contains('active')) || pages[0];
+  pages.forEach(p => p.classList.remove('active'));
+  active.classList.add('active');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const id = tab.getAttribute('data-target');
+      if(id) show(id);
+    });
+  });
+})();
+
+
+
+// ===== Robust Router (hash-aware, tab-safe) =====
+(function(){
+  const tabs = Array.from(document.querySelectorAll('#rootTabs .tab'));
+  const pages = Array.from(document.querySelectorAll('[data-route]'));
+  if(!tabs.length || !pages.length) return;
+
+  function idFromTab(tab){
+    // prefer explicit data-target
+    let t = tab.getAttribute('data-target');
+    if(t && t.startsWith('#')) return t;
+    // anchor href (if markup uses <a>)
+    const href = tab.getAttribute('href');
+    if(href && href.startsWith('#')) return href;
+    // infer from text content
+    const txt = (tab.textContent||'').toLowerCase();
+    if(txt.includes('sinusal') || txt.includes('sinus')) return '#sinus';
+    if(txt.includes('fibrill') || txt.includes('fa')) return '#fa';
+    if(txt.includes('special')) return '#special';
+    return '#sinus';
+  }
+
+  function show(id){
+    pages.forEach(p => p.classList.remove('active'));
+    const tgt = document.querySelector(id);
+    if(tgt && tgt.hasAttribute('data-route')){
+      tgt.classList.add('active');
+    }
+    // tab highlight
+    tabs.forEach(t => t.classList.remove('active'));
+    const match = tabs.find(t => idFromTab(t)===id);
+    if(match) match.classList.add('active');
+    // scroll to top
+    window.scrollTo({top:0, behavior:'auto'});
+  }
+
+  // Clicks
+  tabs.forEach(tab => {
+    tab.addEventListener('click', (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const id = idFromTab(tab);
+      if(location.hash !== id) {
+        history.pushState(null, '', id);
+      }
+      show(id);
+    });
+  });
+
+  // Hash routing (back/forward)
+  window.addEventListener('hashchange', ()=>{
+    const id = location.hash || '#sinus';
+    show(id);
+  });
+
+  // Initial route
+  const init = location.hash || '#sinus';
+  show(init);
+})();
+
+
+
+// ===== Root tabs a11y & indicator state =====
+(function(){
+  const tablist = document.getElementById('rootTabs');
+  if(!tablist) return;
+  tablist.setAttribute('role','tablist');
+  const tabs = Array.from(tablist.querySelectorAll('.tab'));
+  tabs.forEach(t => { t.setAttribute('role','tab'); t.setAttribute('tabindex','0'); });
+  function updateAria(){
+    const active = tablist.querySelector('.tab.active');
+    tabs.forEach(t => t.setAttribute('aria-selected', t===active ? 'true' : 'false'));
+  }
+  updateAria();
+  tabs.forEach(t => t.addEventListener('click', updateAria));
+  tabs.forEach(t => t.addEventListener('keydown', (e)=>{
+    if(e.key==='ArrowRight' || e.key==='ArrowLeft'){
+      e.preventDefault();
+      const i = tabs.indexOf(document.activeElement);
+      if(i>=0){
+        const n = (e.key==='ArrowRight') ? (i+1)%tabs.length : (i-1+tabs.length)%tabs.length;
+        tabs[n].focus();
+        tabs[n].click();
+      }
+    }
+  }));
+})();
