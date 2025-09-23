@@ -63,3 +63,9 @@ header{background:linear-gradient(135deg,var(--bg),#2b2468 60%);}
   margin-left:8px;
 }
 .btn.ghost:hover{ background:#f1f5f9; }
+
+
+/* Show only one top-level page (route) at a time */
+[data-route]{ display:none; }
+[data-route].active{ display:block; }
+

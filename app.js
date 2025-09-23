@@ -787,3 +787,32 @@ document.getElementById('forceUpdateBtn')?.addEventListener('click', forceUpdate
   });
 })();
 
+
+
+// ===== Route handling: show exactly one top-level page =====
+(function(){
+  const rootTabs = document.querySelectorAll('#rootTabs .tab');
+  const pages = Array.from(document.querySelectorAll('[data-route]'));
+  if(rootTabs.length && pages.length){
+    function show(id){
+      pages.forEach(p => p.classList.remove('active'));
+      const target = document.querySelector(id);
+      if(target) target.classList.add('active');
+      // ensure scroll to top for clarity
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    rootTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        rootTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const id = tab.getAttribute('data-target') || tab.getAttribute('data-href') || '#sinus';
+        show(id);
+      });
+    });
+    // On load, keep first page active only
+    const active = pages.find(p => p.classList.contains('active')) || pages[0];
+    pages.forEach(p => p.classList.remove('active'));
+    if(active) active.classList.add('active');
+  }
+})();
+
