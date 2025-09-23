@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nuragica-v7';
+const CACHE_NAME = 'nuragica-v9';
 const ASSETS = [
                   './assets/icons/splash-dark-1170x2532.png',
 './assets/icons/splash-light-1170x2532.png',
@@ -48,4 +48,17 @@ self.addEventListener('fetch', (event) => {
       }).catch(() => caches.match('./index.html'))
     )
   );
+});
+
+
+self.addEventListener('message', (event) => {
+  if(event.data && event.data.type === 'SKIP_WAITING'){
+    self.skipWaiting();
+  }
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    await self.clients.claim();
+  })());
 });

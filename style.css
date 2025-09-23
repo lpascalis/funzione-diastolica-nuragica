@@ -45,3 +45,21 @@ header{background:linear-gradient(135deg,var(--bg),#2b2468 60%);}
 .tab{background:linear-gradient(180deg,#eaf5ff,#e8eef5);}
 .btn{box-shadow:0 6px 16px rgba(14,165,165,.25)}
 .card{border:1px solid #eef2f7}
+
+
+/* Scope visibility rules to top-level pages */
+#pages > .section{ display:none; }
+#pages > .section.active{ display:block; }
+
+/* Nested special tabs */
+#spTabs .tab.active{ border-bottom:2px solid var(--accent); }
+
+
+/* Secondary/ghost button */
+.btn.ghost{
+  background: transparent;
+  border:1px solid #cbd5e1;
+  color: var(--ink);
+  margin-left:8px;
+}
+.btn.ghost:hover{ background:#f1f5f9; }

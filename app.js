@@ -56,7 +56,7 @@ const has = (id) => $(id)?.value && $(id).value.trim().length>0;
 document.querySelectorAll('#rootTabs .tab').forEach(tab=>{
   tab.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('#pages > .section').forEach(s=>s.classList.remove('active'));
     tab.classList.add('active');
     const target = tab.getAttribute('data-target');
     document.querySelector(target).classList.add('active');
@@ -732,4 +732,58 @@ document.getElementById('calcHcm')?.addEventListener('click', ()=>{
   <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>`;
   setResult('hcmResult','hcmDetails',status,title,details);
 });
+
+
+
+// ===== Force Update (iPad cache issues) =====
+async function forceUpdate(){
+  try{
+    if('serviceWorker' in navigator){
+      const reg = await navigator.serviceWorker.getRegistration();
+      if(reg){
+        // Ask SW to skip waiting if a new one exists
+        if (reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
+        await reg.update();
+        await reg.unregister();
+      }
+    }
+    if('caches' in window){
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+    }
+  }catch(e){ console.log(e); }
+  // Hard reload with cache-buster
+  const url = new URL(window.location.href);
+  url.searchParams.set('v', Date.now());
+  window.location.replace(url.toString());
+}
+
+document.getElementById('forceUpdateBtn')?.addEventListener('click', forceUpdate);
+
+
+
+// ===== Universal Reset Buttons for all calculators =====
+(function(){
+  function resetSection(section){
+    if(!section) return;
+    section.querySelectorAll('input[type=number], input[type=text]').forEach(inp=>{ inp.value=''; });
+    section.querySelectorAll('select').forEach(sel=>{ sel.selectedIndex = 0; });
+    section.querySelectorAll('.field-warn').forEach(n=>{ n.textContent=''; });
+    // Hide result/status boxes inside this section only
+    section.querySelectorAll('.status').forEach(b=>{ b.style.display='none'; });
+    section.querySelectorAll('[id$="Details"]').forEach(d=>{ d.style.display='none'; d.innerHTML=''; });
+  }
+  document.querySelectorAll('button[id^="calc"]').forEach(btn=>{
+    const section = btn.closest('.section');
+    if(!section) return;
+    // Avoid duplicate reset buttons
+    if(section.querySelector('.btn.reset')) return;
+    const reset = document.createElement('button');
+    reset.className = 'btn ghost reset';
+    reset.type = 'button';
+    reset.textContent = '↺ Reset';
+    reset.addEventListener('click', ()=> resetSection(section));
+    btn.insertAdjacentElement('afterend', reset);
+  });
+})();
 
