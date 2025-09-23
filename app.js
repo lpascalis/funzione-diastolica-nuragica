@@ -53,7 +53,7 @@ const getNum = (id) => {
 const has = (id) => $(id)?.value && $(id).value.trim().length>0;
 
 // Tabs
-document.querySelectorAll('.tab').forEach(tab=>{
+document.querySelectorAll('#rootTabs .tab').forEach(tab=>{
   tab.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
