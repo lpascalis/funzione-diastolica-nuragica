@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nuragica-v3';
+const CACHE_NAME = 'nuragica-v4';
 const ASSETS = [
                   './assets/icons/splash-dark-1170x2532.png',
 './assets/icons/splash-light-1170x2532.png',

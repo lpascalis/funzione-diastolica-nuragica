@@ -271,3 +271,207 @@ $('#calcAF').addEventListener('click', ()=>{
     </ul>
   `;
 });
+
+
+// Sub-tabs inside Special Populations
+(function(){
+  const container = document.getElementById('spTabs');
+  if(!container) return;
+  const tabs = container.querySelectorAll('.tab');
+  const sections = ['#sp_valv','#sp_htx','#sp_ph','#sp_block','#sp_restr','#sp_costr','#sp_hcm'].map(sel=>document.querySelector(sel));
+  tabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      sections.forEach(s=>s.classList.remove('active'));
+      tab.classList.add('active');
+      const tgt = tab.getAttribute('data-target');
+      document.querySelector(tgt)?.classList.add('active');
+    });
+  });
+})();
+
+
+
+// ------- Special Populations Calculators -------
+
+// Helpers
+function showResult(idBox, idDet, status, title, details){
+  const box = document.getElementById(idBox);
+  const det = document.getElementById(idDet);
+  box.style.display = 'block'; det.style.display = 'block';
+  box.className = 'status ' + (status||'warn');
+  box.innerHTML = title;
+  det.innerHTML = details;
+}
+
+// Valvulopatie
+document.getElementById('calcValv')?.addEventListener('click', ()=>{
+  const type = document.getElementById('valv_type').value;
+  const ee = Number(document.getElementById('valv_ee').value || NaN);
+  const tr = Number(document.getElementById('valv_tr').value || NaN);
+  const pasp = Number(document.getElementById('valv_pasp').value || NaN);
+  const pv = Number(document.getElementById('valv_pv_sd').value || NaN);
+  const lavi = Number(document.getElementById('valv_lavi').value || NaN);
+  const ara = Number(document.getElementById('valv_ar_a').value || NaN);
+
+  const abn = [];
+  if (ee>=14) abn.push('E/e′ elevato');
+  if ((tr>=2.8) || (pasp>=35)) abn.push('TR/PASP elevato');
+  if (pv<=0.67) abn.push('PV S/D ≤0.67');
+  if (lavi>34) abn.push('LAVi >34');
+  if (ara>30) abn.push('Ar−A >30 ms');
+
+  let title='', status='warn', notes=[];
+  if (type==='MR' || type==='MS' || type==='MAC'){
+    notes.push('Nei casi MR severa, qualsiasi MS o MAC moderata‑severa, evitare algoritmo generale; interpretazione dedicata.');
+  }
+  if (abn.length>=2){
+    title = '<strong>LAP aumentata probabile</strong> (valvulopatia)';
+    status = 'bad';
+  } else if (abn.length===0){
+    title = 'LAP probabilmente normale (valvulopatia)';
+    status = 'ok';
+  } else {
+    title = 'LAP indeterminata (valvulopatia)';
+    status = 'warn';
+  }
+  const details = `<div class="kv"><div class="k">Anomalie</div><div>${abn.join(', ')||'—'}</div></div>
+  ${notes.length?('<hr><ul><li>'+notes.join('</li><li>')+'</li></ul>'):''}`;
+  showResult('valvResult','valvDetails',status,title,details);
+});
+
+// Trapianto cardiaco
+document.getElementById('calcHtx')?.addEventListener('click', ()=>{
+  const eprime = Number(document.getElementById('htx_eprime').value || NaN);
+  const ee = Number(document.getElementById('htx_ee').value || NaN);
+  const tr = Number(document.getElementById('htx_tr').value || NaN);
+  const pv = Number(document.getElementById('htx_pv_sd').value || NaN);
+  const lavi = Number(document.getElementById('htx_lavi').value || NaN);
+
+  const flags=[];
+  if (ee>=14) flags.push('E/e′ elevato');
+  if (tr>=2.8) flags.push('TR ≥2.8');
+  if (pv<=0.67) flags.push('PV S/D ≤0.67');
+  if (lavi>34) flags.push('LAVi >34');
+  if (eprime<=6.5) flags.push('e′ ridotta');
+
+  let status='warn', title='LAP indeterminata (trapianto)';
+  if (flags.length>=2){ status='bad'; title='<strong>LAP aumentata probabile</strong> (trapianto)'; }
+  if (flags.length===0){ status='ok'; title='LAP probabilmente normale (trapianto)'; }
+  const details = `<div class="kv"><div class="k">Criteri</div><div>${flags.join(', ')||'—'}</div></div>
+  <hr><ul><li>Evita inferenze semplicistiche: correlare con clinica, tempi post‑HTX, biopsia/CMR se indicato.</li></ul>`;
+  showResult('htxResult','htxDetails',status,title,details);
+});
+
+// Ipertensione polmonare
+document.getElementById('calcPH')?.addEventListener('click', ()=>{
+  const ea = Number(document.getElementById('ph_ea').value || NaN);
+  const eel = Number(document.getElementById('ph_ee_lat').value || NaN);
+  const lavi = Number(document.getElementById('ph_lavi').value || NaN);
+  const lars = Number(document.getElementById('ph_lars').value || NaN);
+
+  let status='warn', title='Indeterminato (PH)';
+  let subtype = '', support=[];
+  if (ea<=0.8){ subtype = 'pre‑capillare'; status='ok'; title='Probabile PH pre‑capillare'; }
+  else if (ea>=2){ subtype = 'post‑capillare'; status='bad'; title='<strong>Probabile PH post‑capillare</strong>'; }
+  else {
+    if (eel>13) support.push('E/e′ lat >13');
+    if (lavi>34) support.push('LAVi >34');
+    if (lars<=16) support.push('LARS ≤16%');
+    if (support.length>=1){ status='bad'; title='<strong>PH post‑capillare più probabile</strong>'; }
+  }
+  const details = `<div class="kv"><div class="k">Classificazione</div><div>${subtype||'—'}</div></div>
+  <div class="kv"><div class="k">Supporto</div><div>${support.join(', ')||'—'}</div></div>`;
+  showResult('phResult','phDetails',status,title,details);
+});
+
+// Blocco/LBBB/Pacing
+document.getElementById('calcBlock')?.addEventListener('click', ()=>{
+  const ea = Number(document.getElementById('block_ea').value || NaN);
+  const ee = Number(document.getElementById('block_ee').value || NaN);
+  const tr = Number(document.getElementById('block_tr').value || NaN);
+  const lavi = Number(document.getElementById('block_lavi').value || NaN);
+  const lars = Number(document.getElementById('block_lars').value || NaN);
+
+  const flags=[];
+  if (ee>=14) flags.push('E/e′ elevato');
+  if (tr>=2.8) flags.push('TR ≥2.8');
+  if (lavi>34) flags.push('LAVi >34');
+  if (lars<=18) flags.push('LARS ≤18%');
+
+  let status='warn', title='LAP indeterminata (blocco/pacing)';
+  if (flags.length>=2){ status='bad'; title='<strong>LAP aumentata probabile</strong> (blocco/pacing)'; }
+  if (flags.length===0 && ea<=0.8){ status='ok'; title='Pattern da rilasciamento alterato probabile (EA ≤0.8)'; }
+  const details = `<div class="kv"><div class="k">Criteri</div><div>${flags.join(', ')||'—'}</div></div>
+  <hr><ul><li>Attenzione alla fusione E/A; usare sweep 100 mm/s se necessario.</li></ul>`;
+  showResult('blockResult','blockDetails',status,title,details);
+});
+
+// Restrittiva/Amiloidosi
+document.getElementById('calcRestr')?.addEventListener('click', ()=>{
+  const ea = Number(document.getElementById('restr_ea').value || NaN);
+  const dt = Number(document.getElementById('restr_dt').value || NaN);
+  const ivrt = Number(document.getElementById('restr_ivrt').value || NaN);
+  const epm = Number(document.getElementById('restr_eprime_med').value || NaN);
+  const apex = document.getElementById('restr_apex').value;
+
+  const flags=[];
+  if (ea>=2.5) flags.push('E/A ≥2.5');
+  if (dt>0 && dt<150) flags.push('DT <150 ms');
+  if (ivrt>0 && ivrt<50) flags.push('IVRT <50 ms');
+  if (epm>0 && epm<=4) flags.push('e′ mediale 3–4 cm/s');
+  if (apex==='si') flags.push('Apical-sparing GLS');
+
+  let status='warn', title='Compatibilità non definita (restrittiva)';
+  if (flags.length>=3){ status='bad'; title='<strong>Alta probabilità di pattern restrittivo</strong>'; }
+  else if (flags.length===0){ status='ok'; title='Bassa probabilità di pattern restrittivo'; }
+
+  const details = `<div class="kv"><div class="k">Indici</div><div>${flags.join(', ')||'—'}</div></div>
+  <hr><ul><li>Correlare con clinica/biomarcatori; CMR e scintigrafia se indicato.</li></ul>`;
+  showResult('restrResult','restrDetails',status,title,details);
+});
+
+// Pericardite costrittiva
+document.getElementById('calcCostr')?.addEventListener('click', ()=>{
+  const vm = Number(document.getElementById('costr_resp_mitral').value || NaN);
+  const vt = Number(document.getElementById('costr_resp_tric').value || NaN);
+  const epm = Number(document.getElementById('costr_eprime_med').value || NaN);
+  const rev = document.getElementById('costr_reversus').value;
+
+  const flags=[];
+  if (vm>=25) flags.push('Δ mitralica ≥25%');
+  if (vt>=40) flags.push('Δ tricuspidale ≥40%');
+  if (epm>=7) flags.push('e′ mediale ≥7 cm/s');
+  if (rev==='si') flags.push('Hepatic vein reversus');
+
+  let status='warn', title='Costrizione non definita';
+  if (flags.length>=2){ status='bad'; title='<strong>Compatibile con pericardite costrittiva</strong>'; }
+  else if (flags.length===0){ status='ok'; title='Poco compatibile con costrizione'; }
+
+  const details = `<div class="kv"><div class="k">Segni ecocardiografici</div><div>${flags.join(', ')||'—'}</div></div>
+  <hr><ul><li>Integrare con Doppler tessutale settale/lat e variazioni respiratorie. Considerare TC/RM pericardica.</li></ul>`;
+  showResult('costrResult','costrDetails',status,title,details);
+});
+
+// HCM
+document.getElementById('calcHcm')?.addEventListener('click', ()=>{
+  const ee = Number(document.getElementById('hcm_ee').value || NaN);
+  const ea = Number(document.getElementById('hcm_ea').value || NaN);
+  const lavi = Number(document.getElementById('hcm_lavi').value || NaN);
+  const tr = Number(document.getElementById('hcm_tr').value || NaN);
+
+  const risk=[];
+  if (ee>=14) risk.push('E/e′ elevato');
+  if (ea>=2) risk.push('E/A ≥2 (restrittivo)');
+  if (lavi>34) risk.push('LAVi >34');
+  if (tr>=2.8) risk.push('TR ≥2.8');
+
+  let status='warn', title='Valutazione HCM';
+  if (risk.length>=2){ status='bad'; title='<strong>Evidenza di riempimento elevato</strong> (HCM)'; }
+  else if (risk.length===0){ status='ok'; title='Assenza di segni di riempimento elevato (HCM)'; }
+
+  const details = `<div class="kv"><div class="k">Indicatori</div><div>${risk.join(', ')||'—'}</div></div>
+  <hr><ul><li>Integrare con gradiente LVOT, sintomi, e parametri di rischio clinico.</li></ul>`;
+  showResult('hcmResult','hcmDetails',status,title,details);
+});
+
