@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Funzione Diastolica Nuragica</title>
   <meta name="theme-color" content="#ffffff" />
-  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <link rel="icon" href="assets/favicon.png" type="image/png"/>
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png"/>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -26,7 +26,6 @@
     <button data-target="special">Popolazioni speciali</button>
     <button data-target="about">Info</button>
   </nav>
-  <div class="wizard-bar"><button id="openWizard" class="ghost small">Wizard scenario</button></div>
 </header>
 
 <main id="content">
@@ -37,7 +36,7 @@
         <h2>Ritmo sinusale</h2>
         <button class="ghost" data-reset="sinus">Reset</button>
       </div>
-      <p class="hint">Algoritmo in due stadi: (1) LAP con e′ ridotta + E/e′ aumentato + TR/PASP; (2) grading da E/A. Soglie e′ corrette per età (obbligatorie).</p>
+      <p class="hint">Inserisci i parametri principali. L’età è obbligatoria per le soglie di e′.</p>
       <div class="grid grid-iphone">
         <div class="field"><label>Età (anni)</label><input type="number" inputmode="numeric" id="sin_age" /></div>
         <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="sin_e_sept" /></div>
@@ -55,35 +54,15 @@
           <div class="field"><label>LARS (%)</label><input type="number" inputmode="decimal" id="sin_lars" /></div>
           <div class="field"><label>IVRT (ms)</label><input type="number" inputmode="numeric" id="sin_ivrt" /></div>
           <div class="field"><label>Ar–A PV (ms)</label><input type="number" inputmode="numeric" id="sin_ar_a" /></div>
-          <div class="field"><label>L-wave mitralica (cm/s)</label><input type="number" inputmode="decimal" id="sin_lwave" /></div>
+          <div class="field"><label>L-wave (cm/s)</label><input type="number" inputmode="decimal" id="sin_lwave" /></div>
           <div class="field"><label>PR end-diastolica (m/s)</label><input type="number" inputmode="decimal" id="sin_pr_ed" /></div>
           <div class="field"><label>PADP (mmHg)</label><input type="number" inputmode="numeric" id="sin_padp" /></div>
         </div>
-      </details>
-      <details class="helper">
-        <summary>Calcolo rapido LAVi</summary>
-        <div class="grid grid-iphone">
-          <div class="field"><label>Peso (kg)</label><input type="number" inputmode="decimal" id="sin_peso" /></div>
-          <div class="field"><label>Altezza (cm)</label><input type="number" inputmode="decimal" id="sin_altezza" /></div>
-          <div class="field"><label>Volume LA (mL)</label><input type="number" inputmode="decimal" id="sin_la_vol" /></div>
-        </div>
-        <div class="actions"><button class="ghost" data-lavi="sin">Calcola & inserisci</button></div>
-        <div class="inline-msg" id="sin_lavi_msg"></div>
       </details>
       <div class="actions sticky">
         <button class="primary" id="sin_calc">Calcola</button>
       </div>
       <div class="result" id="sin_result"></div>
-      <details class="thresholds"><summary>Soglie rapide</summary>
-        <ul>
-          <li>e′ (20–39): sept &lt;7, lat &lt;10, medio &lt;9 cm/s</li>
-          <li>e′ (40–65): sept &lt;6, lat &lt;8, medio &lt;7 cm/s</li>
-          <li>e′ (&gt;65): sept &lt;6, lat &lt;7, medio &lt;6.5 cm/s</li>
-          <li>E/e′: medio &gt;14, settale &gt;15, laterale &gt;13 → sosp. LAP↑</li>
-          <li>TR ≥2.8 m/s o PASP ≥35 mmHg → supporto LAP↑</li>
-          <li>E/A: ≤0.8 (con E bassa) = Grado I; 0.8–2 → Grado I–II; ≥2 → Grado III</li>
-        </ul>
-      </details>
     </div>
   </section>
 
@@ -94,33 +73,16 @@
         <h2>Fibrillazione atriale</h2>
         <button class="ghost" data-reset="af">Reset</button>
       </div>
-      <p class="hint">LAP aumentate se ≥2/4: E≥100, E/e′ settale&gt;11 (calcolata), TR≥2.8 o PASP≥35, DT≤160.</p>
+      <p class="hint">Criteri: E≥100, E/e′ settale&gt;11, TR≥2.8 o PASP≥35, DT≤160 (≥2/4 → LAP↑).</p>
       <div class="grid grid-iphone">
         <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="af_E" /></div>
         <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="af_e_sept" /></div>
         <div class="field"><label>TR (m/s)</label><input type="number" inputmode="decimal" id="af_TR" /></div>
         <div class="field"><label>PASP (mmHg)</label><input type="number" inputmode="numeric" id="af_PASP" /></div>
         <div class="field"><label>DT (ms)</label><input type="number" inputmode="numeric" id="af_DT" /></div>
-        <div class="field"><label>LAVi (mL/m²)</label><input type="number" inputmode="decimal" id="af_lavi" /></div>
       </div>
-      <details class="helper">
-        <summary>Calcolo rapido LAVi</summary>
-        <div class="grid grid-iphone">
-          <div class="field"><label>Peso (kg)</label><input type="number" inputmode="decimal" id="af_peso" /></div>
-          <div class="field"><label>Altezza (cm)</label><input type="number" inputmode="decimal" id="af_altezza" /></div>
-          <div class="field"><label>Volume LA (mL)</label><input type="number" inputmode="decimal" id="af_la_vol" /></div>
-        </div>
-        <div class="actions"><button class="ghost" data-lavi="af">Calcola & inserisci</button></div>
-        <div class="inline-msg" id="af_lavi_msg"></div>
-      </details>
       <div class="actions sticky"><button class="primary" id="af_calc">Calcola</button></div>
       <div class="result" id="af_result"></div>
-      <details class="thresholds"><summary>Soglie rapide</summary>
-        <ul>
-          <li>Quattro criteri: E ≥100 • E/e′ sept &gt;11 • TR ≥2.8/PASP ≥35 • DT ≤160</li>
-          <li>≥2 criteri → LAP↑; 0–1 → LAP normale</li>
-        </ul>
-      </details>
     </div>
   </section>
 
@@ -142,7 +104,7 @@
       </div>
 
       <section id="sp_valv" class="subpanel hidden">
-        <p class="hint">MR severa, MS o MAC moderata/severa: usa indicatori alternativi.</p>
+        <p class="hint">MR severa, MS o MAC: privilegia indicatori alternativi.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>MR severa?</label><select id="valv_mr"><option value="no">No</option><option value="si">Sì</option></select></div>
           <div class="field"><label>MS presente?</label><select id="valv_ms"><option value="no">No</option><option value="si">Sì</option></select></div>
@@ -157,25 +119,8 @@
           <div class="field"><label>LAVi (mL/m²)</label><input type="number" inputmode="decimal" id="valv_lavi" /></div>
           <div class="field"><label>LARS (%)</label><input type="number" inputmode="decimal" id="valv_lars" /></div>
         </div>
-        <details class="helper">
-          <summary>Calcolo rapido LAVi</summary>
-          <div class="grid grid-iphone">
-            <div class="field"><label>Peso (kg)</label><input type="number" inputmode="decimal" id="valv_peso" /></div>
-            <div class="field"><label>Altezza (cm)</label><input type="number" inputmode="decimal" id="valv_altezza" /></div>
-            <div class="field"><label>Volume LA (mL)</label><input type="number" inputmode="decimal" id="valv_la_vol" /></div>
-          </div>
-          <div class="actions"><button class="ghost" data-lavi="valv">Calcola & inserisci</button></div>
-          <div class="inline-msg" id="valv_lavi_msg"></div>
-        </details>
         <div class="actions sticky"><button class="primary" id="valv_calc">Calcola</button></div>
         <div class="result" id="valv_result"></div>
-        <details class="thresholds"><summary>Soglie rapide</summary>
-          <ul>
-            <li>Ar–A PV &gt;30 ms → LAP↑</li>
-            <li>E/e′ medio &gt;14 (con cautela)</li>
-            <li>TR ≥2.8 o PASP ≥35 → supporto LAP↑</li>
-          </ul>
-        </details>
       </section>
 
       <section id="sp_htx" class="subpanel hidden">
@@ -189,17 +134,10 @@
         </div>
         <div class="actions sticky"><button class="primary" id="htx_calc">Calcola</button></div>
         <div class="result" id="htx_result"></div>
-        <details class="thresholds"><summary>Soglie rapide</summary>
-          <ul>
-            <li>E/e′ medio: &lt;7 = normale • &gt;14 = LAP↑</li>
-            <li>Se 7–14 → E/SRIVR &gt;200 cm = LAP↑ (altrimenti normale)</li>
-            <li>Se SRIVR non disponibile → TR &gt;2.8 m/s = LAP↑</li>
-          </ul>
-        </details>
       </section>
 
       <section id="sp_ph" class="subpanel hidden">
-        <p class="hint">Variabile guida: E/e′ laterale (calcolata). Integra con E/A, LARS, LAVi.</p>
+        <p class="hint">Variabile guida: E/e′ laterale. Integra con E/A, LARS, LAVi.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="ph_E" /></div>
           <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="ph_e_lat" /></div>
@@ -207,28 +145,12 @@
           <div class="field"><label>LARS (%)</label><input type="number" inputmode="decimal" id="ph_lars" /></div>
           <div class="field"><label>LAVi (mL/m²)</label><input type="number" inputmode="decimal" id="ph_lavi" /></div>
         </div>
-        <details class="helper">
-          <summary>Calcolo rapido LAVi</summary>
-          <div class="grid grid-iphone">
-            <div class="field"><label>Peso (kg)</label><input type="number" inputmode="decimal" id="ph_peso" /></div>
-            <div class="field"><label>Altezza (cm)</label><input type="number" inputmode="decimal" id="ph_altezza" /></div>
-            <div class="field"><label>Volume LA (mL)</label><input type="number" inputmode="decimal" id="ph_la_vol" /></div>
-          </div>
-          <div class="actions"><button class="ghost" data-lavi="ph">Calcola & inserisci</button></div>
-          <div class="inline-msg" id="ph_lavi_msg"></div>
-        </details>
         <div class="actions sticky"><button class="primary" id="ph_calc">Calcola</button></div>
         <div class="result" id="ph_result"></div>
-        <details class="thresholds"><summary>Soglie rapide</summary>
-          <ul>
-            <li>E/e′ laterale: &gt;13 = LAP↑ • &lt;8 = normale • 8–13 = grigio</li>
-            <li>Se grigio: E/A ≥2 o LAVi &gt;34 o LARS &lt;16 → postcapillare</li>
-          </ul>
-        </details>
       </section>
 
       <section id="sp_av" class="subpanel hidden">
-        <p class="hint">Se fusione E/A o sola E → usa TR/PASP; altrimenti E/e′ calcolato con cautela.</p>
+        <p class="hint">Se fusione E/A o sola E → usa TR/PASP; altrimenti E/e′ con cautela.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>E e A separabili?</label><select id="av_sep"><option value="si">Sì</option><option value="no">No (fusione)</option></select></div>
           <div class="field"><label>Solo onda E?</label><select id="av_onlyE"><option value="no">No</option><option value="si">Sì</option></select></div>
@@ -240,16 +162,10 @@
         </div>
         <div class="actions sticky"><button class="primary" id="av_calc">Calcola</button></div>
         <div class="result" id="av_result"></div>
-        <details class="thresholds"><summary>Soglie rapide</summary>
-          <ul>
-            <li>Fusione E/A o sola E: privilegia TR/PASP</li>
-            <li>Se separabili: E/e′ medio &gt;14 o TR/PASP↑ → LAP↑</li>
-          </ul>
-        </details>
       </section>
 
       <section id="sp_rcm" class="subpanel hidden">
-        <p class="hint">Criteri tipici delle fasi avanzate; restituisce coerenza con fisiologia restrittiva e grado.</p>
+        <p class="hint">Pattern restrittivo: E/A&gt;2.5, DT&lt;150, IVRT&lt;50.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>E/A</label><input type="number" inputmode="decimal" id="rcm_EA" /></div>
           <div class="field"><label>DT (ms)</label><input type="number" inputmode="numeric" id="rcm_DT" /></div>
@@ -259,16 +175,10 @@
         </div>
         <div class="actions sticky"><button class="primary" id="rcm_calc">Calcola</button></div>
         <div class="result" id="rcm_result"></div>
-        <details class="thresholds"><summary>Soglie rapide</summary>
-          <ul>
-            <li>E/A &gt;2.5 • DT &lt;150 ms • IVRT &lt;50 ms → compatibile con restrittivo (LAP↑)</li>
-            <li>e′ molto bassa (≤4) rafforza il sospetto</li>
-          </ul>
-        </details>
       </section>
 
       <section id="sp_cp" class="subpanel hidden">
-        <p class="hint">Differenziale con restrizione: usa variazioni respiratorie, HV reversal, e′ mediale e annulus reversus.</p>
+        <p class="hint">Differenziale con restrizione: variazioni respiratorie, HV reversal, annulus reversus.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>Variazione mitrale con respiro (%)</label><input type="number" inputmode="numeric" id="cp_mitral_var" /></div>
           <div class="field"><label>Variazione tricuspide con respiro (%)</label><input type="number" inputmode="numeric" id="cp_tric_var" /></div>
@@ -278,17 +188,10 @@
         </div>
         <div class="actions sticky"><button class="primary" id="cp_calc">Calcola</button></div>
         <div class="result" id="cp_result"></div>
-        <details class="thresholds"><summary>Soglie rapide</summary>
-          <ul>
-            <li>Annulus reversus/paradoxus: e′ mediale &gt; laterale</li>
-            <li>Variazioni respiratorie: mitrale &gt;25%, tricuspide &gt;40%</li>
-            <li>HV reversal (rapporto ≥0.8 in esp.)</li>
-          </ul>
-        </details>
       </section>
 
       <section id="sp_hcm" class="subpanel hidden">
-        <p class="hint">LAP multiparametriche (E/e′ calcolato, PV, TR/PASP, LAVi); grading via E/A.</p>
+        <p class="hint">LAP multiparametriche; grading via E/A.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="hcm_E" /></div>
           <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="hcm_e_sept" /></div>
@@ -299,24 +202,8 @@
           <div class="field"><label>LAVi (mL/m²)</label><input type="number" inputmode="decimal" id="hcm_lavi" /></div>
           <div class="field"><label>E/A</label><input type="number" inputmode="decimal" id="hcm_EA" /></div>
         </div>
-        <details class="helper">
-          <summary>Calcolo rapido LAVi</summary>
-          <div class="grid grid-iphone">
-            <div class="field"><label>Peso (kg)</label><input type="number" inputmode="decimal" id="hcm_peso" /></div>
-            <div class="field"><label>Altezza (cm)</label><input type="number" inputmode="decimal" id="hcm_altezza" /></div>
-            <div class="field"><label>Volume LA (mL)</label><input type="number" inputmode="decimal" id="hcm_la_vol" /></div>
-          </div>
-          <div class="actions"><button class="ghost" data-lavi="hcm">Calcola & inserisci</button></div>
-          <div class="inline-msg" id="hcm_lavi_msg"></div>
-        </details>
         <div class="actions sticky"><button class="primary" id="hcm_calc">Calcola</button></div>
         <div class="result" id="hcm_result"></div>
-        <details class="thresholds"><summary>Soglie rapide</summary>
-          <ul>
-            <li>Indizi LAP↑: E/e′ medio &gt;14 • TR/PASP↑ • PV S/D ≤0.67 • LAVi &gt;34</li>
-            <li>Grading via E/A (come sinusale)</li>
-          </ul>
-        </details>
       </section>
     </div>
   </section>
@@ -333,36 +220,6 @@
 <footer class="app-footer" style="padding-bottom:calc(24px + env(safe-area-inset-bottom));">
   <p>© Funzione Diastolica Nuragica — uso clinico a discrezione medica.</p>
 </footer>
-
-<!-- Wizard Modal -->
-<div id="wizard" class="modal hidden">
-  <div class="modal-card">
-    <div class="modal-head"><h3>Wizard Scenario</h3><button id="closeWizard" class="ghost small">Chiudi</button></div>
-    <div class="grid grid-iphone">
-      <div class="field">
-        <label>Ritmo</label>
-        <select id="w_ritmo">
-          <option value="sinus">Ritmo sinusale</option>
-          <option value="af">Fibrillazione atriale</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Condizione</label>
-        <select id="w_cond">
-          <option value="">Nessuna</option>
-          <option value="sp_valv">Valvulopatie</option>
-          <option value="sp_htx">Trapianto</option>
-          <option value="sp_ph">Ipertensione polmonare</option>
-          <option value="sp_av">AV/LBBB/Pacing</option>
-          <option value="sp_rcm">Restrittiva</option>
-          <option value="sp_cp">Costrizione</option>
-          <option value="sp_hcm">HCM</option>
-        </select>
-      </div>
-    </div>
-    <div class="actions"><button id="w_go" class="primary">Vai al calcolatore</button></div>
-  </div>
-</div>
 
 <script src="app.js"></script>
 </body>
