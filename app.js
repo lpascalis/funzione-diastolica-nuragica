@@ -13,7 +13,7 @@ tabbar.addEventListener('click', (e)=>{
 });
 showPanel('sinus');
 
-// Sub-tabs for special populations (guard against double init)
+// Sub-tabs for special populations
 const spTabs = document.getElementById('spTabs');
 if(spTabs && !window.__spInit){
   window.__spInit = true;
@@ -27,7 +27,6 @@ if(spTabs && !window.__spInit){
   spTabs.addEventListener('click', (e)=>{
     const b=e.target.closest('button[data-target]'); if(!b) return; showSp(b.dataset.target);
   });
-  // default open first
   showSp('sp_valv');
 }
 
@@ -39,6 +38,10 @@ function headline(t){ return `<div class="headline">${t}</div>`; }
 function kv(k,v){ return `<div class="kv"><div class="k">${k}</div><div class="v">${v}</div></div>`; }
 function info(text){ return ` <span class="badge-ico" title="${text}">ⓘ</span>`; }
 function copyBlock(text){ return `<div class="copy"><button onclick="navigator.clipboard.writeText(\`${text.replace(/`/g,'\\`')}\`)">Copia risultato</button><span class="k">copiato negli appunti</span></div>`; }
+function eAvg(sept, lat){ const arr=[sept,lat].filter(x=>x!=null); if(!arr.length) return null; return arr.reduce((a,b)=>a+b,0)/arr.length; }
+function Ee_from(E, eprime){ if(E==null || eprime==null || eprime<=0) return null; return E/eprime; }
+function Ee_avg(E, eSept, eLat){ const em = eAvg(eSept, eLat); return Ee_from(E, em); }
+function ageThr(age){ if(age==null) return {sept:6, lat:7, avg:6.5}; if(age<40) return {sept:7, lat:10, avg:9}; if(age<=65) return {sept:6, lat:8, avg:7}; return {sept:6, lat:7, avg:6.5}; }
 
 // Inline guidance helpers
 function setInlineMsg(el, text, type='warn'){
@@ -56,11 +59,70 @@ function clearInlineMsg(el){
   el.classList.remove('err-field');
 }
 
-// Shared calc helpers
-function eAvg(sept, lat){ const arr=[sept,lat].filter(x=>x!=null); if(!arr.length) return null; return arr.reduce((a,b)=>a+b,0)/arr.length; }
-function Ee_from(E, eprime){ if(E==null || eprime==null || eprime<=0) return null; return E/eprime; }
-function Ee_avg(E, eSept, eLat){ const em = eAvg(eSept, eLat); return Ee_from(E, em); }
-function ageThr(age){ if(age==null) return {sept:6, lat:7, avg:6.5}; if(age<40) return {sept:7, lat:10, avg:9}; if(age<=65) return {sept:6, lat:8, avg:7}; return {sept:6, lat:7, avg:6.5}; }
+// Wizard
+const wizard = document.getElementById('wizard');
+document.getElementById('openWizard').addEventListener('click', ()=> wizard.classList.remove('hidden'));
+document.getElementById('closeWizard').addEventListener('click', ()=> wizard.classList.add('hidden'));
+document.getElementById('w_go').addEventListener('click', ()=>{
+  const ritmo = document.getElementById('w_ritmo').value;
+  const cond = document.getElementById('w_cond').value;
+  if(cond){
+    showPanel('special');
+    const btn = [...document.querySelectorAll('#spTabs button')].find(b=>b.dataset.target===cond);
+    if(btn){ btn.click(); }
+  }else{
+    showPanel(ritmo);
+  }
+  wizard.classList.add('hidden');
+});
+
+// LAVi helper
+function calcBSAkgcm(kg, cm){ if(kg==null||cm==null||kg<=0||cm<=0) return null; return Math.sqrt((kg*cm)/3600); }
+function attachLaviHelper(idPrefix){
+  const btn = document.querySelector(`[data-lavi="${idPrefix}"]`);
+  if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    const peso = v(document.getElementById(`${idPrefix}_peso`).value);
+    const alt  = v(document.getElementById(`${idPrefix}_altezza`).value);
+    const la   = v(document.getElementById(`${idPrefix}_la_vol`).value);
+    const msg  = document.getElementById(`${idPrefix}_lavi_msg`);
+    if(peso==null || alt==null || la==null){ if(msg) msg.textContent='Inserisci peso, altezza e volume LA.'; return; }
+    const bsa = calcBSAkgcm(peso, alt);
+    if(bsa==null){ if(msg) msg.textContent='Valori non validi.'; return; }
+    const lavi = la / bsa;
+    const input = document.getElementById(`${idPrefix}_lavi`);
+    if(input){ input.value = (Math.round(lavi*10)/10).toString(); }
+    if(msg) msg.textContent = `BSA = ${bsa.toFixed(2)} m² → LAVi = ${lavi.toFixed(1)} mL/m² (inserito)`;
+  });
+}
+['sin','af','valv','ph','hcm'].forEach(id=> attachLaviHelper(id));
+
+// Shared warnings & suggestions
+function addSuggestions(outEl, list){
+  if(!list || !list.length) return;
+  const ul = list.map(s=>`<li>${s}</li>`).join('');
+  outEl.innerHTML += `<div class="sugg"><h4>Suggerimenti</h4><ul>${ul}</ul></div>`;
+}
+function addWarnings(outEl, list){
+  if(!list || !list.length) return;
+  const ul = list.map(s=>`<li>${s}</li>`).join('');
+  outEl.innerHTML += `<div class="warns"><h4>Avvisi di coerenza</h4><ul>${ul}</ul></div>`;
+}
+function warnCommon({E, EA, Ee, Ee_m, Ee_s, Ee_l, LAVi, TR, PASP}){
+  const w = [];
+  if(EA!=null && EA>=2 && E!=null && E<=50) w.push('E/A elevato con E ≤50 cm/s: verifica aliasing/angolo o pseudonormalizzazione.');
+  if((TR!=null && TR>=2.8)||(PASP!=null && PASP>=35)){
+    if((Ee_m!=null && Ee_m<=14) || (Ee_s!=null && Ee_s<=11) || (Ee_l!=null && Ee_l<=13)){
+      w.push('TR/PASP elevati ma E/e′ non aumentato: considera setting "Ipertensione polmonare".');
+    }
+  }
+  if(LAVi!=null && LAVi<=34 && ((Ee_m!=null && Ee_m>=16)||(Ee_s!=null && Ee_s>=15)||(Ee_l!=null && Ee_l>=14))){
+    w.push('E/e′ molto elevato con LAVi normale: valuta contesto acuto/tecnico.');
+  }
+  return w;
+}
+
+// ---------- SINUS ----------
 function requireEAndEprime(Eel, eEls, ctxLabel='E/e′'){
   let ok = true;
   if(v(Eel.value)==null && eEls.some(e=>v(e.value)!=null)){
@@ -73,7 +135,6 @@ function requireEAndEprime(Eel, eEls, ctxLabel='E/e′'){
   return ok;
 }
 
-// ---------- SINUS ----------
 function sinusCalc(){
   const ageEl = document.getElementById('sin_age');
   const Eel = document.getElementById('sin_E');
@@ -138,6 +199,17 @@ function sinusCalc(){
   if(suppAbn) details += kv("Supporto positivo", "Presente");
   const txtCopy = `Ritmo sinusale — LAP ${lap}${grade? " — "+grade:""}. ${phrase.replace(/\*\*/g,'')}`;
   out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+
+  // warnings & suggestions
+  const warns = warnCommon({E, EA, Ee_m:Ee_m, Ee_s:Ee_s, Ee_l:Ee_l, LAVi:lavi, TR, PASP});
+  addWarnings(out, warns);
+  if(out.textContent.includes('Valutazione indeterminata')){
+    const vals = {EA, E, TR, PASP, LAVi:lavi, Ee_m:Ee_m, Ee_s:Ee_s, Ee_l:Ee_l};
+    const s=[]; if(baseCount===1 || baseCount===2) s.push('Aggiungi PV S/D o LARS o Ar–A PV per dirimere LAP.');
+    if(EA==null) s.push('Misura E/A per definire il grado.');
+    if(TR==null && PASP==null) s.push('Stima TR/PASP per aumentare l’accuratezza.');
+    addSuggestions(out, s.slice(0,3));
+  }
 }
 document.getElementById('sin_calc').addEventListener('click', sinusCalc);
 
@@ -152,8 +224,6 @@ function afCalc(){
   const TR = v(document.getElementById('af_TR').value);
   const PASP = v(document.getElementById('af_PASP').value);
   const DT = v(document.getElementById('af_DT').value);
-  const lars = v(document.getElementById('af_lars').value);
-  const pv_sd = v(document.getElementById('af_pv_sd').value);
   const lavi = v(document.getElementById('af_lavi').value);
 
   const Ee_sept = Ee_from(E, eSept);
@@ -165,14 +235,10 @@ function afCalc(){
 
   let lap='Indeterminate', status='warn';
   if(nAbn>=2){ lap='Aumentate'; status='bad'; }
-  else if(nAbn<=1){
-    const normalSupport = ( (lars!=null && lars>=18) || (pv_sd!=null && pv_sd>=1.0) || (lavi!=null && lavi<=34) );
-    lap = normalSupport ? 'Normali' : 'Indeterminate';
-    status = normalSupport ? 'good' : 'warn';
-  }
+  else if(nAbn<=1){ lap='Normali'; status='good'; }
 
   let phrase = lap==='Aumentate' ? '**Probabile aumento delle LAP** in fibrillazione atriale (≥2 criteri patologici).'
-           : lap==='Normali' ? '**LAP nei limiti** in fibrillazione atriale (supporto favorevole).'
+           : lap==='Normali' ? '**LAP nei limiti** in fibrillazione atriale.'
            : '**Valutazione indeterminata** in fibrillazione atriale; media di più cicli e variabili aggiuntive raccomandate.';
 
   const out = document.getElementById('af_result');
@@ -180,6 +246,16 @@ function afCalc(){
   let details = kv("E/e′ settale (calcolata)", (Ee_sept!=null? Ee_sept.toFixed(1):'—') + info("E/e′ settale = E / e′ settale")) + kv("Criteri patologici", `${nAbn}/4`);
   const txtCopy = `FA — LAP ${lap}. ${phrase.replace(/\*\*/g,'')}`;
   out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+
+  const warns = warnCommon({E, EA:null, Ee_s:Ee_sept, LAVi:lavi, TR, PASP});
+  addWarnings(out, warns);
+  if(out.textContent.includes('Valutazione indeterminata')){
+    const s=[];
+    if(nAbn===1) s.push('Media su ≥5 cicli (E, e′, DT) per ridurre outlier.');
+    if(DT==null) s.push('Aggiungi DT (ms): è uno dei 4 criteri principali.');
+    if(TR==null && PASP==null) s.push('Stima TR/PASP: rapido e informativo.');
+    addSuggestions(out, s.slice(0,3));
+  }
 }
 document.getElementById('af_calc').addEventListener('click', afCalc);
 
@@ -221,17 +297,22 @@ function valvCalc(){
   let details = kv("E/e′ medio (calcolato)", (Ee_m!=null? Ee_m.toFixed(1):'—') + info("E/e′ media = E / e′ media")) + kv("Ar–A > 30 ms", arApos?'Sì':'No') + kv("TR/PASP aumentati", trpasp?'Sì':'No');
   const txtCopy = `Valvulopatie — LAP ${lap}. ${phrase.replace(/\*\*/g,'')}`;
   out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+
+  if(out.textContent.includes('Valutazione indeterminata')){
+    const s=[];
+    if(!arApos) s.push('Misura Ar–A PV (≥30 ms suggerisce LAP↑).');
+    if(Ee_m==null) s.push('Completa con e′ settale/laterale per E/e′ medio.');
+    if(TR==null && PASP==null) s.push('Aggiungi TR/PASP come supporto.');
+    addSuggestions(out, s.slice(0,2));
+  }
 }
 document.getElementById('valv_calc').addEventListener('click', valvCalc);
 
 // ---------- HTX ----------
 function htxCalc(){
-  const Eel = document.getElementById('htx_E');
-  const eS  = document.getElementById('htx_e_sept');
-  const eL  = document.getElementById('htx_e_lat');
-  requireEAndEprime(Eel, [eS,eL], 'E/e′ medio');
-
-  const E = v(Eel.value), eSept = v(eS.value), eLat = v(eL.value);
+  const E = v(document.getElementById('htx_E').value);
+  const eSept = v(document.getElementById('htx_e_sept').value);
+  const eLat  = v(document.getElementById('htx_e_lat').value);
   const srivr = v(document.getElementById('htx_srivr').value);
   const TR    = v(document.getElementById('htx_TR').value);
 
@@ -242,7 +323,7 @@ function htxCalc(){
     if(Ee_m<7) lap='Normali';
     else if(Ee_m>14) lap='Aumentate';
     else {
-      if(srirvValid(srirv=srivr)){
+      if(srivr!=null && srivr>0){
         const ratio = E!=null && srivr!=null && srivr>0? (E/srirv): null;
         details += kv('E/SRIVR (cm)', (ratio!=null? ratio.toFixed(0): '—') + info('E/SRIVR = E (cm/s) / SRIVR (1/s)'));
         lap = (ratio!=null && ratio>200)? 'Aumentate' : 'Normali';
@@ -256,8 +337,6 @@ function htxCalc(){
     lap = TR>2.8 ? 'Aumentate' : 'Normali';
   }
 
-  function srirvValid(s){ return s!=null && s>0; }
-
   const status = lap==='Aumentate'?'bad':(lap==='Normali'?'good':'warn');
   let phrase = lap==='Aumentate' ? '**LAP aumentate** in trapianto (criteri dedicati positivi).'
              : lap==='Normali' ? '**LAP nei limiti** in trapianto (criteri dedicati favorevoli).'
@@ -267,17 +346,20 @@ function htxCalc(){
   let pills = pill(`LAP: ${lap}`, status);
   const txtCopy = `Trapianto — LAP ${lap}. ${phrase.replace(/\*\*/g,'')}`;
   out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+
+  if(out.textContent.includes('Valutazione indeterminata')){
+    const s=[];
+    if(Ee_m!=null && Ee_m>=7 && Ee_m<=14 && (srivr==null || srivr<=0)) s.push('Misura SRIVR e calcola E/SRIVR (soglia ~200 cm).');
+    if(TR==null) s.push('In assenza di SRIVR, usa TR come fallback.');
+    addSuggestions(out, s.slice(0,2));
+  }
 }
 document.getElementById('htx_calc').addEventListener('click', htxCalc);
 
 // ---------- PH ----------
 function phCalc(){
-  const Eel = document.getElementById('ph_E');
-  const eL  = document.getElementById('ph_e_lat');
-  requireEAndEprime(Eel, [eL], 'E/e′ laterale');
-
-  const E = v(Eel.value);
-  const eLat = v(eL.value);
+  const E = v(document.getElementById('ph_E').value);
+  const eLat = v(document.getElementById('ph_e_lat').value);
   const EA = v(document.getElementById('ph_EA').value);
   const lars = v(document.getElementById('ph_lars').value);
   const lavi = v(document.getElementById('ph_lavi').value);
@@ -302,21 +384,24 @@ function phCalc(){
   let details = kv('E/e′ laterale (calcolata)', (Ee_lat!=null? Ee_lat.toFixed(1):'—') + info('E/e′ laterale = E / e′ laterale')) + kv('Combinazioni (E/A≥2 o LARS<16% o LAVi>34)', ((EA!=null&&EA>=2)||(lars!=null&&lars<16)||(lavi!=null&&lavi>34))?'Sì':'No');
   const txtCopy = `PH — LAP ${lap}. ${phrase.replace(/\*\*/g,'')}`;
   out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+
+  if(out.textContent.includes('Valutazione indeterminata')){
+    const s=[];
+    if(EA==null) s.push('Aggiungi E/A per distinguere pre- vs post-capillare.');
+    if(lavi==null) s.push('Inserisci LAVi (helper rapido disponibile).');
+    if(lars==null) s.push('Aggiungi LARS (cutoff ~16–18%).');
+    addSuggestions(out, s.slice(0,3));
+  }
 }
 document.getElementById('ph_calc').addEventListener('click', phCalc);
 
 // ---------- AV/LBBB/PACING ----------
 function avCalc(){
-  const sep = yes(document.getElementById('av_sep'));
-  const onlyE = yes(document.getElementById('av_onlyE'));
-  const Eel = document.getElementById('av_E');
-  const eS  = document.getElementById('av_e_sept');
-  const eL  = document.getElementById('av_e_lat');
-  if(sep && !onlyE){ requireEAndEprime(Eel, [eS,eL], 'E/e′ medio'); }
-
-  const E = v(Eel.value);
-  const eSept = v(eS.value);
-  const eLat  = v(eL.value);
+  const sep = (document.getElementById('av_sep').value==='si');
+  const onlyE = (document.getElementById('av_onlyE').value==='si');
+  const E = v(document.getElementById('av_E').value);
+  const eSept = v(document.getElementById('av_e_sept').value);
+  const eLat  = v(document.getElementById('av_e_lat').value);
   const TR = v(document.getElementById('av_TR').value);
   const PASP = v(document.getElementById('av_PASP').value);
 
@@ -336,6 +421,13 @@ function avCalc(){
   let details = kv('E/e′ medio (calcolato)', (Ee_m!=null? Ee_m.toFixed(1):'—') + info('E/e′ media = E / e′ media')) + kv('TR/PASP aumentati', trpasp? 'Sì':'No') + kv('E/A interpretabile', (sep && !onlyE)?'Sì':'No');
   const txtCopy = `AV/LBBB/Pacing — LAP ${lap}. ${phrase.replace(/\*\*/g,'')}`;
   out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+
+  if(out.textContent.includes('Valutazione indeterminata')){
+    const s=[];
+    if(!sep || onlyE) s.push('Usa TR/PASP o battiti con separazione E/A se disponibili.');
+    if(Ee_m==null && sep) s.push('Completa e′ settale/laterale per E/e′ medio.');
+    addSuggestions(out, s.slice(0,2));
+  }
 }
 document.getElementById('av_calc').addEventListener('click', avCalc);
 
@@ -359,6 +451,13 @@ function rcmCalc(){
   let details = kv('E/A > 2.5', EA!=null && EA>2.5 ? 'Sì':'No') + kv('DT < 150 ms', DT!=null && DT<150 ? 'Sì':'No') + kv('IVRT < 50 ms', IVRT!=null && IVRT<50 ? 'Sì':'No');
   const txtCopy = `RCM — LAP ${lap}${grade? ' — '+grade:''}. ${phrase.replace(/\*\*/g,'')}`;
   out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+
+  if(out.textContent.includes('Valutazione indeterminata')){
+    const s=[];
+    if(!(EA!=null && EA>2.5)) s.push('Verifica E/A su scala corretta e aliasing.');
+    if(IVRT==null) s.push('Aggiungi IVRT (<50 ms rafforza la restrizione).');
+    addSuggestions(out, s.slice(0,2));
+  }
 }
 document.getElementById('rcm_calc').addEventListener('click', rcmCalc);
 
@@ -386,19 +485,21 @@ function cpCalc(){
   let details = kv('Variazione mitrale >25%', mitralAbn?'Sì':'No') + kv('Variazione tricuspide >40%', tricuspidAbn?'Sì':'No') + kv('HV end-diast./anterogrado ≥0.8', hepaticAbn?'Sì':'No') + kv('e′ mediale >7 cm/s', medialHigh?'Sì':'No') + kv('Annulus reversus', annulusReversus?'Sì':'No');
   const txtCopy = `Costrizione — ${tag}. ${phrase.replace(/\*\*/g,'')}`;
   out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+
+  if(out.textContent.includes('Indizi non conclusivi')){
+    const s=[];
+    if(mitVar==null or triVar==null) s.push('Inserisci variazioni respiratorie mitrale/tricuspide.');
+    if(hvRatio==null) s.push('Aggiungi HV reversal (rapporto in espirazione).');
+    addSuggestions(out, s.slice(0,2));
+  }
 }
 document.getElementById('cp_calc').addEventListener('click', cpCalc);
 
 // ---------- HCM ----------
 function hcmCalc(){
-  const Eel = document.getElementById('hcm_E');
-  const eS  = document.getElementById('hcm_e_sept');
-  const eL  = document.getElementById('hcm_e_lat');
-  requireEAndEprime(Eel, [eS,eL], 'E/e′ medio');
-
-  const E = v(Eel.value);
-  const eSept = v(eS.value);
-  const eLat  = v(eL.value);
+  const E = v(document.getElementById('hcm_E').value);
+  const eSept = v(document.getElementById('hcm_e_sept').value);
+  const eLat  = v(document.getElementById('hcm_e_lat').value);
   const TR = v(document.getElementById('hcm_TR').value);
   const PASP = v(document.getElementById('hcm_PASP').value);
   const pv_sd = v(document.getElementById('hcm_pv_sd').value);
@@ -425,6 +526,13 @@ function hcmCalc(){
   let details = kv('E/e′ medio (calcolato)', (Ee_m!=null? Ee_m.toFixed(1):'—') + info('E/e′ media = E / e′ media')) + kv('Criteri LAP positivi', `${abn}`) + (grade? kv('Grado (E/A)', grade):'');
   const txtCopy = `HCM — LAP ${lap}${grade?' — '+grade:''}. ${phrase.replace(/\*\*/g,'')}`;
   out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+
+  if(out.textContent.includes('Valutazione indeterminata')){
+    const s=[];
+    if(Ee_m==null) s.push('Completa e′ settale/laterale per E/e′ medio.');
+    if(pv_sd==null) s.push('Aggiungi PV S/D (≤0.67 favorisce LAP↑).');
+    addSuggestions(out, s.slice(0,2));
+  }
 }
 document.getElementById('hcm_calc').addEventListener('click', hcmCalc);
 
