@@ -1,485 +1,474 @@
 
-// ===== Frasi sintetiche per referto =====
-const REFERTI = {
-  sinus_normal: "Funzione diastolica nei limiti, senza evidenza di aumento delle pressioni di riempimento ventricolare sinistro.",
-  sinus_g1_lap_normal: "Pattern di rilasciamento alterato (grado I), senza incremento significativo delle pressioni di riempimento ventricolare sinistro.",
-  sinus_g2_lap_high: "Pattern pseudonormale (grado II), con evidenza di aumento delle pressioni di riempimento ventricolare sinistro.",
-  sinus_g3_lap_high: "Pattern diastolico restrittivo (grado III), con marcato aumento delle pressioni di riempimento ventricolare sinistro.",
-  sinus_indet: "Valutazione diastolica indeterminata per dati non concordanti o incompleti.",
-
-  af_normal: "In fibrillazione atriale: profilo compatibile con pressioni di riempimento non aumentate a riposo.",
-  af_highlap: "In fibrillazione atriale: reperti coerenti con aumento delle pressioni di riempimento ventricolare sinistro a riposo.",
-  af_indet: "In fibrillazione atriale: valutazione indeterminata per variabilità o dati non conclusivi.",
-
-  valv_lap_normal: "In presenza di valvulopatia: indici complessivi non indicativi di aumento delle pressioni di riempimento ventricolare sinistro.",
-  valv_lap_high: "In presenza di valvulopatia: indici complessivi coerenti con aumento delle pressioni di riempimento ventricolare sinistro.",
-  valv_indet: "In presenza di valvulopatia: interpretazione indeterminata; inquadrare nel contesto emodinamico e nella severità della lesione.",
-
-  htx_lap_normal: "Dopo trapianto cardiaco: profilo compatibile con pressioni di riempimento non aumentate.",
-  htx_lap_high: "Dopo trapianto cardiaco: reperti coerenti con aumento delle pressioni di riempimento ventricolare sinistro.",
-  htx_indet: "Dopo trapianto cardiaco: valutazione indeterminata; necessaria integrazione clinico-strumentale.",
-
-  ph_precap: "Assetto compatibile con ipertensione polmonare pre-capillare, senza chiara evidenza di aumento delle pressioni di riempimento sinistro.",
-  ph_postcap: "Assetto compatibile con ipertensione polmonare post-capillare (gruppo II), suggestivo di aumento delle pressioni di riempimento sinistro.",
-  ph_indet: "Classificazione dell’ipertensione polmonare indeterminata sulla base dei parametri disponibili.",
-
-  block_lap_normal: "Con blocco di branca/pacing: quadro non indicativo di aumento delle pressioni di riempimento sinistro.",
-  block_lap_high: "Con blocco di branca/pacing: indici concordi per aumento delle pressioni di riempimento sinistro.",
-  block_indet: "Con blocco di branca/pacing: valutazione indeterminata (possibile fusione di onde o dati discordanti).",
-
-  restr_highprob: "Profilo restrittivo/infiltrativo probabile, con verosimile aumento delle pressioni di riempimento sinistro.",
-  restr_lowprob: "Bassa probabilità di pattern restrittivo; assenza di segni di incremento pressorio a riposo.",
-  restr_indet: "Pattern restrittivo non definibile con i parametri disponibili.",
-
-  costr_compatible: "Quadro compatibile con pericardite costrittiva (dinamica respiratoria e indici annulari suggestivi).",
-  costr_unlikely: "Reperti poco compatibili con pericardite costrittiva.",
-  costr_indet: "Compatibilità con costrizione pericardica indeterminata.",
-
-  hcm_highfill: "Cardiomiopatia ipertrofica: reperti indicativi di riempimento elevato del ventricolo sinistro.",
-  hcm_normal: "Cardiomiopatia ipertrofica: assenza di evidenza di riempimento elevato a riposo.",
-  hcm_indet: "Cardiomiopatia ipertrofica: valutazione indeterminata."
-};
-
-// ===== Shared Helpers =====
-function val(n){ const v = Number(String(n).replace(',', '.')); return Number.isFinite(v)? v : NaN; }
-function badge(status){ if(status==='ok') return '🟢 Normale'; if(status==='bad') return '🔴 Aumentata'; return '🟡 Indeterminata'; }
-function setResult(boxId, detId, status, title, details){
-  const box = document.getElementById(boxId); const det = document.getElementById(detId);
-  if(!box || !det) return;
-  box.style.display = 'block'; det.style.display = 'block';
-  box.className = 'status ' + (status||'warn');
-  box.innerHTML = `<strong>${badge(status)}</strong> — ${title}`;
-  det.innerHTML = details;
-  scrollToBox(box);
+// Tab navigation
+const tabbar = document.getElementById('tabs');
+const panels = [...document.querySelectorAll('.panel')];
+function showPanel(id){
+  panels.forEach(p => p.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  [...tabbar.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.dataset.target===id));
+  window.scrollTo({top:0, behavior:'smooth'});
 }
-function copyReport(text){ try{ navigator.clipboard.writeText(text); toast('Copiato negli appunti'); } catch(e){ console.log(e); } }
-function toast(msg){
-  let t = document.getElementById('toast');
-  if(!t){ t = document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:9999'; document.body.appendChild(t); }
-  t.textContent = msg; t.style.opacity='1'; setTimeout(()=>{ t.style.opacity='0'; }, 1400);
-}
-function showWarnUnder(el, msg){
-  let s = el.nextElementSibling;
-  if(!s || !s.classList || !s.classList.contains('field-warn')){
-    s = document.createElement('div'); s.className='field-warn'; s.style.cssText='color:#b45309;font-size:12px;margin-top:4px'; el.parentNode.appendChild(s);
-  }
-  s.textContent = msg;
-}
-function clearWarn(el){ let s = el.nextElementSibling; if(s && s.classList && s.classList.contains('field-warn')) s.textContent=''; }
-function scrollToBox(el){ try{ el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){} }
+tabbar.addEventListener('click', (e)=>{
+  const b = e.target.closest('button[data-target]');
+  if(!b) return;
+  showPanel(b.dataset.target);
+});
+// default
+showPanel('sinus');
 
-// ===== Soft field validation =====
-document.addEventListener('input', (e)=>{
-  const inp = e.target; if(!(inp instanceof HTMLInputElement)) return; if(inp.type!=='number') return;
-  const id = inp.id || ''; const v = Number(String(inp.value).replace(',','.')); if(!Number.isFinite(v)){ clearWarn(inp); return; }
-  let ok=true, msg=''; if(/ea\b/i.test(id)) { if(v<0 || v>3.5){ ok=false; msg='E/A atteso 0–3.5'; } }
-  if(/tr/i.test(id)) { if(v<0 || v>5){ ok=false; msg='TR tipico 0–5 m/s'; } }
-  if(/lavi/i.test(id)) { if(v<5 || v>150){ ok=false; msg='LAVi atteso 5–150 mL/m²'; } }
-  if(/ee|e_e/i.test(id)) { if(v<3 || v>35){ ok=false; msg='E/e′ tipico 3–35'; } }
-  if(/pasp/i.test(id)) { if(v<10 || v>120){ ok=false; msg='PASP atteso 10–120 mmHg'; } }
-  if(/lars/i.test(id)) { if(v<5 || v>45){ ok=false; msg='LARS tipico 5–45%'; } }
-  if(/dt\b/i.test(id)) { if(v<60 || v>300){ ok=false; msg='DT tipico 60–300 ms'; } }
-  if(/ivrt/i.test(id)) { if(v<30 || v>150){ ok=false; msg='IVRT tipico 30–150 ms'; } }
-  if(/eprime|e′|e_med|e_mediale/i.test(id)) { if(v<1 || v>20){ ok=false; msg='e′ tipico 1–20 cm/s'; } }
-  if(!ok) showWarnUnder(inp, msg); else clearWarn(inp);
+// Toggle age-adjusted thresholds in sinus
+const sinAgeChk = document.getElementById('sin_age_adj');
+const sinAgeWrap = document.getElementById('sin_age_wrap');
+sinAgeChk.addEventListener('change', ()=>{
+  sinAgeWrap.style.display = sinAgeChk.checked ? '' : 'none';
 });
 
-// ===== Root routing (one page visible) =====
-(function(){
-  const pages = Array.from(document.querySelectorAll('[data-route]')); if(!pages.length) return;
-  const tabs = Array.from(document.querySelectorAll('#rootTabs .tab'));
-  function show(id){
-    pages.forEach(p => p.classList.remove('active')); const target = document.querySelector(id);
-    if(target){ target.classList.add('active'); window.scrollTo({top:0, behavior:'smooth'}); }
-    tabs.forEach(t => t.classList.remove('active')); const current = tabs.find(t => t.getAttribute('data-target')===id);
-    if(current){ current.classList.add('active'); tabs.forEach(t => t.setAttribute('aria-selected', t===current ? 'true' : 'false')); }
-  }
-  const active = pages.find(p => p.classList.contains('active')) || pages[0]; pages.forEach(p => p.classList.remove('active')); if(active) active.classList.add('active');
-  tabs.forEach(tab => tab.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); show(tab.getAttribute('data-target')); }));
-})();
-
-// ===== Special tabs isolation =====
-(function(){
-  const tabs = Array.from(document.querySelectorAll('#spTabs .tab'));
-  const ids = ['#sp_valv','#sp_htx','#sp_ph','#sp_block','#sp_restr','#sp_costr','#sp_hcm'];
-  const panels = ids.map(s=>document.querySelector(s)).filter(Boolean);
-  function show(id){ panels.forEach(p=>p.classList.remove('active')); const t = document.querySelector(id); if(t) t.classList.add('active');
-    tabs.forEach(x=>x.classList.remove('active')); const cur = tabs.find(x=>x.getAttribute('data-target')===id); if(cur) cur.classList.add('active'); }
-  if(tabs.length){ show(tabs[0].getAttribute('data-target')); tabs.forEach(t=> t.addEventListener('click', ()=> show(t.getAttribute('data-target')) )); }
-})();
-
-// ===== Force Update (cache clear) =====
-async function forceUpdate(){
-  try{
-    if('serviceWorker' in navigator){
-      const reg = await navigator.serviceWorker.getRegistration();
-      if(reg){ if (reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'}); await reg.update(); await reg.unregister(); }
-    }
-    if('caches' in window){ const keys = await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k))); }
-  }catch(e){ console.log(e); }
-  const url = new URL(window.location.href); url.searchParams.set('v', Date.now()); window.location.replace(url.toString());
+function val(v){ const n = Number(v); return isFinite(n)? n : null; }
+function yes(sel){ return (sel?.value||'')==='si'; }
+function badge(label, type=''){ return `<span class="pill ${type}">${label}</span>`; }
+function headline(t){ return `<div class="headline">${t}</div>`; }
+function kv(k,v){ return `<div class="kv"><div class="k">${k}</div><div class="v">${v}</div></div>`; }
+function copyBlock(text){
+  return `<div class="copy"><button onclick="navigator.clipboard.writeText(\`${text.replace(/`/g,'\\`')}\`)">Copia risultato</button><span class="k">copiato negli appunti</span></div>`;
 }
-document.getElementById('forceUpdateBtn')?.addEventListener('click', forceUpdate);
 
-// ===== Autosave + Unit Hints =====
-(function persistInputs(){
-  const sections = document.querySelectorAll('.section');
-  sections.forEach(sec=>{
-    const sid = sec.id || '';
-    try{ const saved = JSON.parse(localStorage.getItem('nuragica:'+sid) || '{}');
-      Object.entries(saved).forEach(([id,val])=>{ const el = sec.querySelector('#'+id); if(el) el.value = String(val); });
-    }catch(e){}
-    sec.addEventListener('input', (e)=>{
-      const t = e.target; if(!t.id) return; const data = JSON.parse(localStorage.getItem('nuragica:'+sid) || '{}'); data[t.id] = t.value;
-      localStorage.setItem('nuragica:'+sid, JSON.stringify(data));
-    });
-  });
-})();
-(function unitsHints(){
-  const unitMap = [
-    {match:/\btr\b/i, text:'m/s'},
-    {match:/pasp/i, text:'mmHg'},
-    {match:/lavi/i, text:'mL/m²'},
-    {match:/eprime|e′|e_med|e_mediale/i, text:'cm/s'},
-    {match:/ee|e_e/i, text:'(unitless)'},
-    {match:/dt|ivrt/i, text:'ms'},
-    {match:/lars/i, text:'%'},
-    {match:/ea\b/i, text:'rapporto'}
-  ];
-  document.querySelectorAll('input[type=number], input[type=text], select').forEach(el=>{
-    const id = el.id || ''; const cfg = unitMap.find(u=>u.match.test(id)); if(!cfg) return;
-    if(el.nextElementSibling?.classList?.contains('unit-hint')) return; const hint = document.createElement('small');
-    hint.className='unit-hint'; hint.style.cssText='display:block;color:#64748b;font-size:12px;margin-top:4px;'; hint.textContent = cfg.text; el.parentNode.appendChild(hint);
-  });
-})();
+// ---------- SINUS LOGIC (Figure 3) ----------
+function sinusCalc(){
+  const eSept = val(document.getElementById('sin_e_sept').value);
+  const eLat  = val(document.getElementById('sin_e_lat').value);
+  const eAvg  = val(document.getElementById('sin_e_avg').value);
+  const useAge = document.getElementById('sin_age_adj').checked;
+  const age = val(document.getElementById('sin_age').value);
 
-// ===== Universal Reset Buttons =====
-(function(){
-  function resetSection(section){
-    if(!section) return;
-    section.querySelectorAll('input[type=number], input[type=text]').forEach(inp=>{ inp.value=''; });
-    section.querySelectorAll('select').forEach(sel=>{ sel.selectedIndex = 0; });
-    section.querySelectorAll('.field-warn').forEach(n=>{ n.textContent=''; });
-    section.querySelectorAll('.status').forEach(b=>{ b.style.display='none'; });
-    section.querySelectorAll('[id$="Details"]').forEach(d=>{ d.style.display='none'; d.innerHTML=''; });
-  }
-  document.querySelectorAll('.section').forEach(sec=>{
-    const btn = sec.querySelector('button.reset');
-    if(btn) btn.addEventListener('click', ()=> resetSection(sec));
-  });
-})();
-
-function avgAvailable(values){ const arr = values.filter(v => Number.isFinite(v)); if(!arr.length) return NaN; return arr.reduce((a,b)=>a+b,0)/arr.length; }
-
-// ===== Core Algorithms =====
-// Sinus rhythm
-document.getElementById('calcSinus')?.addEventListener('click', ()=>{
-  const eSep = val(document.getElementById('sin_eprime_sep').value);
-  const eLat = val(document.getElementById('sin_eprime_lat').value);
   const E = val(document.getElementById('sin_E').value);
-  const ea = val(document.getElementById('sin_ea').value);
-  const tr = val(document.getElementById('sin_tr').value);
+  const EA = val(document.getElementById('sin_EA').value);
+  const TR = val(document.getElementById('sin_TR').value);
+  const PASP = val(document.getElementById('sin_PASP').value);
+  const Ee_avg = val(document.getElementById('sin_Ee_avg').value);
+  const Ee_sept = val(document.getElementById('sin_Ee_sept').value);
+  const Ee_lat  = val(document.getElementById('sin_Ee_lat').value);
+
+  const pv_sd = val(document.getElementById('sin_pv_sd').value);
+  const lars = val(document.getElementById('sin_lars').value);
   const lavi = val(document.getElementById('sin_lavi').value);
+  const ivrt = val(document.getElementById('sin_ivrt').value);
+  const ar_a = val(document.getElementById('sin_ar_a').value);
+  const lwave = val(document.getElementById('sin_lwave').value);
+  const pr_ed = val(document.getElementById('sin_pr_ed').value);
+  const padp = val(document.getElementById('sin_padp').value);
 
-  const eavg = avgAvailable([eSep, eLat]);
-  const ee = (Number.isFinite(E) && Number.isFinite(eavg) && eavg>0) ? E/eavg : NaN;
+  // Reduced e' — default thresholds per figure; may apply Table 6 by age
+  let red_e = false;
+  if(useAge && age!=null){
+    // Table 6: septal <7 (20-39), <6 (40-65 & >65); lateral <10, <8, <7; avg <9, <7, <6.5
+    let sept_thr = age<40?7:(age<=65?6:6);
+    let lat_thr = age<40?10:(age<=65?8:7);
+    let avg_thr = age<40?9:(age<=65?7:6.5);
+    red_e = (eSept!=null && eSept<sept_thr) || (eLat!=null && eLat<lat_thr) || (eAvg!=null && eAvg<avg_thr);
+  }else{
+    red_e = (eSept!=null && eSept<=6) || (eLat!=null && eLat<=7) || (eAvg!=null && eAvg<=6.5);
+  }
 
-  const crit=[];
-  if(Number.isFinite(eSep) && eSep<7) crit.push("e′ settale <7");
-  if(Number.isFinite(eLat) && eLat<10) crit.push("e′ laterale <10");
-  if(Number.isFinite(ee) && ee>14) crit.push("E/e′ >14");
-  if(Number.isFinite(tr) && tr>=2.8) crit.push("TR ≥2.8");
-  if(Number.isFinite(lavi) && lavi>34) crit.push("LAVi >34");
+  // Increased E/e' threshold: avg >=14 or septal >=15 or lateral >=13
+  let high_Ee = false;
+  if(Ee_avg!=null && Ee_avg>=14) high_Ee = true;
+  if(Ee_sept!=null && Ee_sept>=15) high_Ee = true;
+  if(Ee_lat!=null && Ee_lat>=13) high_Ee = true;
 
-  let status='warn', title='Valutazione sinusale';
-  let grade='—', lap='—';
+  // TR/PASP abnormal
+  let high_TRPASP = false;
+  if(PASP!=null){
+    if(PASP>=35) high_TRPASP = true;
+  }else if(TR!=null){
+    if(TR>=2.8) high_TRPASP = true;
+  }
 
-  // Presence of DD
-  let positives = 0;
-  positives += (Number.isFinite(ee) && ee>14)?1:0;
-  positives += (Number.isFinite(tr) && tr>=2.8)?1:0;
-  positives += (Number.isFinite(lavi) && lavi>34)?1:0;
-  positives += ((Number.isFinite(eSep)&&eSep<7)||(Number.isFinite(eLat)&&eLat<10))?1:0;
+  // Count abnormalities
+  const baseFlags = [red_e, high_Ee, high_TRPASP];
+  const baseCount = baseFlags.filter(Boolean).length;
 
-  let dd = null;
-  if(positives>=3) dd = true;
-  else if(positives<=1) dd = false;
+  // Supplemental support (any supports LAP increased)
+  const suppAbn = (
+    (pv_sd!=null && pv_sd<=0.67) ||
+    (lars!=null && lars<=18) ||
+    (lavi!=null && lavi>34) ||
+    (ivrt!=null && ivrt<=70) ||
+    (ar_a!=null && ar_a>30) ||
+    (lwave!=null && lwave>=50) ||
+    (pr_ed!=null && pr_ed>=2.0) ||
+    (padp!=null && padp>=16)
+  );
 
-  // Grading
-  if(Number.isFinite(ea)){
-    if(ea>=2){ grade='Grado 3 (restrittivo)'; lap='alta'; status='bad'; }
-    else if(ea<=0.8){
-      if(Number.isFinite(E) && E<=50){ grade='Grado 1 (rilasciamento alterato)'; lap='normale'; status = (dd===false?'ok':'warn'); }
-      else {
-        const sup = [(Number.isFinite(ee)&&ee>14),(Number.isFinite(tr)&&tr>=2.8),(Number.isFinite(lavi)&&lavi>34)].filter(Boolean).length;
-        if(sup>=2){ grade='Grado 2'; lap='alta'; status='bad'; }
-        else { grade='Grado 1'; lap='normale'; status= dd===false?'ok':'warn'; }
+  let lapStatus = 'Indeterminate';
+  if(baseCount===3){
+    lapStatus = 'Aumentate';
+  }else if(baseCount===0){
+    lapStatus = 'Normali';
+  }else{
+    // 1–2 abnormal: use supplemental if available
+    if(suppAbn) lapStatus = 'Aumentate';
+    else lapStatus = 'Indeterminate';
+  }
+
+  // Grading via E/A
+  let grade = null;
+  if(EA!=null){
+    if(EA>=2){
+      grade = 'Grado III';
+    }else if(EA<=0.8){
+      // If E low <=50 and LAP not increased => Grade I; otherwise may be II (if LAP increased)
+      if(E!=null && E<=50 && lapStatus!=='Aumentate'){
+        grade = 'Grado I';
+      }else if(lapStatus==='Aumentate'){
+        grade = 'Grado II';
+      }else{
+        grade = 'Grado I';
       }
-    } else {
-      const sup = [(Number.isFinite(ee)&&ee>14),(Number.isFinite(tr)&&tr>=2.8),(Number.isFinite(lavi)&&lavi>34)].filter(Boolean).length;
-      if(sup>=2){ grade='Grado 2'; lap='alta'; status='bad'; }
-      else { grade='Grado 1'; lap='normale/indet'; status = (dd===false?'ok':'warn'); }
+    }else{
+      // 0.8< E/A <2
+      grade = (lapStatus==='Aumentate') ? 'Grado II' : 'Grado I';
     }
   }
 
-  let key = 'sinus_indet';
-  if (grade && /Grado 3/i.test(grade)) key = 'sinus_g3_lap_high';
-  else if (grade && /Grado 2/i.test(grade)) key = 'sinus_g2_lap_high';
-  else if (grade && /Grado 1/i.test(grade) && lap && /normale/i.test(lap)) key = 'sinus_g1_lap_normal';
-  else if (dd===false) key = 'sinus_normal';
+  // Build UI
+  const out = document.getElementById('sin_result');
+  let pills = '';
+  pills += badge(`LAP: ${lapStatus}`, lapStatus==='Aumentate' ? 'bad' : (lapStatus==='Normali'?'good':'warn'));
+  if(grade) pills += badge(grade, grade==='Grado III'?'bad':(grade==='Grado II'?'warn':'good'));
 
-  const report = `Sinusale → ${badge(status)}. DD: ${dd===true?'presente':dd===false?'assente':'indeterminata'}; Grado: ${grade}; Criteri: ${crit.join(', ')||'—'}.`;
-  const details = `<div class="kv"><div class="k">E/e′</div><div>${Number.isFinite(ee)?ee.toFixed(1):'—'}</div></div>
-  <div class="kv"><div class="k">LAP</div><div>${lap}</div></div>
-  <div class="kv"><div class="k">Grado</div><div>${grade}</div></div>
-  <div class="kv"><div class="k">Criteri</div><div>${crit.join(', ')||'—'}</div></div>
-  <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>
-  <p class="hint">${REFERTI[key]||''}</p>`;
-  setResult('sinusResult','sinusDetails',status,`${grade} — ${dd===true?'DD presente':dd===false?'DD assente':'DD indeterminata'}`,details);
-});
+  // Referto phrase
+  let phrase = '';
+  if(lapStatus==='Normali' && (!grade || grade==='Grado I')){
+    phrase = '**Disturbo di rilasciamento (grado I) o pattern nei limiti**, con pressioni di riempimento ventricolare sinistro nei limiti.';
+    if(!grade) grade = 'Grado I / Normale';
+  }else if(grade==='Grado II'){
+    phrase = '**Pattern pseudonormalizzato (grado II)**, con aumento delle pressioni di riempimento del ventricolo sinistro.';
+  }else if(grade==='Grado III'){
+    phrase = '**Pattern restrittivo (grado III)**, con marcato aumento delle pressioni di riempimento del ventricolo sinistro.';
+  }else if(lapStatus==='Aumentate'){
+    phrase = '**LAP aumentate** con pattern non pienamente classificabile (considerare esercizio/variabili di supporto).';
+  }else{
+    phrase = '**Valutazione indeterminata**: integrare con variabili di supporto o eco da sforzo diastolica.';
+  }
 
-// AF
-document.getElementById('calcAF')?.addEventListener('click', ()=>{
+  let details = '';
+  details += kv('Variabili base anomale', `${baseCount}/3`);
+  details += kv('e′ ridotta', red_e? 'Sì' : 'No');
+  details += kv('E/e′ aumentato', high_Ee? 'Sì' : 'No');
+  details += kv('TR/PASP aumentati', high_TRPASP? 'Sì' : 'No');
+  if(suppAbn) details += kv('Supporto (PV/LARS/LAVi/IVRT/others)', 'Presente');
+
+  const txtCopy = `Ritmo sinusale — ${lapStatus}${grade? ' — '+grade : ''}. ${phrase.replace(/\*\*/g,'')}`;
+  out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+}
+document.getElementById('sin_calc').addEventListener('click', sinusCalc);
+
+// ---------- AF LOGIC (Figure 8) ----------
+function afCalc(){
   const E = val(document.getElementById('af_E').value);
-  const ee_sep = val(document.getElementById('af_ee_sep').value);
-  const tr = val(document.getElementById('af_tr').value);
-  const dt = val(document.getElementById('af_dt').value);
+  const Ee_sept = val(document.getElementById('af_Ee_sept').value);
+  const TR = val(document.getElementById('af_TR').value);
+  const PASP = val(document.getElementById('af_PASP').value);
+  const DT = val(document.getElementById('af_DT').value);
+  const lars = val(document.getElementById('af_lars').value);
+  const pv_sd = val(document.getElementById('af_pv_sd').value);
   const lavi = val(document.getElementById('af_lavi').value);
 
-  const crit=[];
-  if(Number.isFinite(ee_sep) && ee_sep>11) crit.push('E/e′ settale >11');
-  if(Number.isFinite(tr) && tr>=2.8) crit.push('TR ≥2.8');
-  if(Number.isFinite(lavi) && lavi>34) crit.push('LAVi >34');
-  if(Number.isFinite(dt) && dt<160 && dt>0) crit.push('DT <160 ms');
+  const f1 = (E!=null && E>=100);
+  const f2 = (Ee_sept!=null && Ee_sept>11);
+  let f3 = null;
+  if(PASP!=null) f3 = PASP>35;
+  else if(TR!=null) f3 = TR>2.8;
+  const f4 = (DT!=null && DT<=160);
 
-  let status='warn', title='LAP indeterminata (FA)';
-  if(crit.length>=2){ status='bad'; title='LAP aumentata (FA)'; }
-  else if(crit.length===0){ status='ok'; title='LAP probabilmente normale (FA)'; }
-
-  let key = (status==='bad') ? 'af_highlap' : (status==='ok' ? 'af_normal' : 'af_indet');
-
-  const report = `FA → ${badge(status)}. Criteri: ${crit.join(', ')||'—'}.`;
-  const details = `<div class="kv"><div class="k">Criteri</div><div>${crit.join(', ')||'—'}</div></div>
-  <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>
-  <p class="hint">${REFERTI[key]||''}</p>`;
-  setResult('afResult','afDetails',status,title,details);
-});
-
-// Valvulopatie
-document.getElementById('calcValv')?.addEventListener('click', ()=>{
-  const type = document.getElementById('valv_type').value;
-  const ee = val(document.getElementById('valv_ee').value);
-  const tr = val(document.getElementById('valv_tr').value);
-  const pasp = val(document.getElementById('valv_pasp').value);
-  const pv = val(document.getElementById('valv_pv_sd').value);
-  const lavi = val(document.getElementById('valv_lavi').value);
-  const ara = val(document.getElementById('valv_ar_a').value);
-
-  const crit=[];
-  if(Number.isFinite(ee) && ee>=14) crit.push('E/e′ ≥14');
-  if( (Number.isFinite(tr) && tr>=2.8) || (Number.isFinite(pasp) && pasp>=35) ) crit.push('TR ≥2.8 o PASP ≥35');
-  if(Number.isFinite(pv) && pv<=0.67) crit.push('PV S/D ≤0.67');
-  if(Number.isFinite(lavi) && lavi>34) crit.push('LAVi >34');
-  if(Number.isFinite(ara) && ara>30) crit.push('Ar–A >30 ms');
-
-  let status='warn', title='LAP indeterminata (valvulopatia)';
-  const notes=[];
-  if(type in {MR:1, MS:1, MAC:1}){
-    notes.push('Per MR severa, MS o MAC moderata–severa usare criteri dedicati.');
+  const flags = [f1,f2,f3,f4].map(x=>!!x);
+  const nAbn = flags.filter(Boolean).length;
+  let lapStatus='Indeterminate';
+  if(nAbn>=2) lapStatus='Aumentate';
+  else if(nAbn<=1) {
+    // support for normality
+    const normalSupport = ( (lars!=null && lars>=18) || (pv_sd!=null && pv_sd>=1.0) || (lavi!=null && lavi<=34) );
+    lapStatus = normalSupport ? 'Normali' : 'Indeterminate';
   }
-  if(crit.length>=2){ status='bad'; title='LAP aumentata probabile (valvulopatia)'; }
-  if(crit.length===0){ status='ok'; title='LAP probabilmente normale (valvulopatia)'; }
 
-  let key = (status==='bad') ? 'valv_lap_high' : (status==='ok' ? 'valv_lap_normal' : 'valv_indet');
+  let phrase = '';
+  if(lapStatus==='Aumentate') phrase='**Probabile aumento delle LAP** in fibrillazione atriale (≥2 criteri patologici).';
+  else if(lapStatus==='Normali') phrase='**LAP nei limiti** in fibrillazione atriale (supporto favorevole).';
+  else phrase='**Valutazione indeterminata** in fibrillazione atriale; considerare media di più cicli e variabili aggiuntive.';
 
-  const report = `Valvulopatie (${type}) → ${badge(status)}. Criteri: ${crit.join(', ')||'nessuno'}.`;
-  const details = `<div class="kv"><div class="k">Criteri</div><div>${crit.join(', ')||'—'}</div></div>
-  ${notes.length?('<hr><ul><li>'+notes.join('</li><li>')+'</li></ul>'):''}
-  <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>
-  <p class="hint">${REFERTI[key]||''}</p>`;
-  setResult('valvResult','valvDetails',status,title,details);
-});
+  const out = document.getElementById('af_result');
+  let pills = badge(`LAP: ${lapStatus}`, lapStatus==='Aumentate'?'bad':(lapStatus==='Normali'?'good':'warn'));
+  const details = kv('Criteri patologici', `${nAbn}/4`) + kv('Supporto verso normalità (LARS/PV/LAVi)', ((lars!=null&&lars>=18)||(pv_sd!=null&&pv_sd>=1)||(lavi!=null&&lavi<=34))?'Presente':'Assente');
+  const txtCopy = `FA — ${lapStatus}. ${phrase.replace(/\*\*/g,'')}`;
+  out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+}
+document.getElementById('af_calc').addEventListener('click', afCalc);
 
-// Trapianto cardiaco
-document.getElementById('calcHtx')?.addEventListener('click', ()=>{
-  const eprime = val(document.getElementById('htx_eprime').value);
-  const ee = val(document.getElementById('htx_ee').value);
-  const tr = val(document.getElementById('htx_tr').value);
-  const pv = val(document.getElementById('htx_pv_sd').value);
-  const lavi = val(document.getElementById('htx_lavi').value);
+// ---------- VALVULOPATHY ----------
+function valvCalc(){
+  const mr = yes(document.getElementById('valv_mr'));
+  const ms = yes(document.getElementById('valv_ms'));
+  const mac = yes(document.getElementById('valv_mac'));
+  const ar_a = val(document.getElementById('valv_ar_a').value);
+  const pv_sd = val(document.getElementById('valv_pv_sd').value);
+  const TR = val(document.getElementById('valv_TR').value);
+  const PASP = val(document.getElementById('valv_PASP').value);
+  const Ee = val(document.getElementById('valv_Ee').value);
+  const lavi = val(document.getElementById('valv_lavi').value);
+  const lars = val(document.getElementById('valv_lars').value);
 
-  let status='warn', title='LAP indeterminata (trapianto)';
-  const crit=[]; const pathway=[];
-  if(Number.isFinite(ee)){
-    if(ee<7){ status='ok'; title='LAP normale (trapianto)'; pathway.push('E/e′ <7'); }
-    else if(ee>14){ status='bad'; title='LAP elevata (trapianto)'; pathway.push('E/e′ >14'); }
+  // Key points: Ar–A >30 ms supports elevated LVEDP even in MR; MR can reduce PV S/D utility.
+  let supportElev = false;
+  if(ar_a!=null && ar_a>30) supportElev = True = true;
+  // TR/PASP and E/e' still informative
+  const trpasp = (PASP!=null ? PASP>=35 : (TR!=null && TR>=2.8));
+  const highEe = (Ee!=null && Ee>=14);
+  const strong = [supportElev, trpasp, highEe].filter(Boolean).length;
+
+  let lapStatus = 'Indeterminate';
+  if(strong>=2) lapStatus='Aumentate';
+  else if(strong===0 && (lavi!=null && lavi<=34) && (lars!=null && lars>=18)){
+    lapStatus='Normali';
+  }
+
+  let phrase = '';
+  const nonApplicabile = (mr||ms||mac) ? ' (algoritmo standard non applicabile)' : '';
+  if(lapStatus==='Aumentate') phrase = `**LAP aumentate${nonApplicabile}** (indicatori alternativi favorevoli).`;
+  else if(lapStatus==='Normali') phrase = `**LAP nei limiti${nonApplicabile}** (indicatori favorevoli).`;
+  else phrase = `**Valutazione indeterminata${nonApplicabile}**: integrare con altre misure e clinica.`;
+
+  const out = document.getElementById('valv_result');
+  let pills = badge(`LAP: ${lapStatus}`, lapStatus==='Aumentate'?'bad':(lapStatus==='Normali'?'good':'warn'));
+  let details = kv('Ar–A > 30 ms', (ar_a!=null && ar_a>30)?'Sì':'No');
+  details += kv('TR/PASP aumentati', trpasp? 'Sì' : 'No');
+  details += kv('E/e′ elevato (≥14)', highEe? 'Sì' : 'No');
+  const txtCopy = `Valvulopatie — ${lapStatus}. ${phrase.replace(/\*\*/g,'')}`;
+  out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+}
+document.getElementById('valv_calc').addEventListener('click', valvCalc);
+
+// ---------- HTX ----------
+function htxCalc(){
+  const E = val(document.getElementById('htx_E').value);
+  const eavg = val(document.getElementById('htx_eavg').value);
+  const srivr = val(document.getElementById('htx_srivr').value); // 1/s
+  const TR = val(document.getElementById('htx_TR').value);
+
+  let lapStatus = 'Indeterminate';
+  let details = '';
+  if(eavg!=null && E!=null){
+    const Ee = E / eavg;
+    details += kv('E/e′ medio', Ee.toFixed(1));
+    if(Ee<7) lapStatus='Normali';
+    else if(Ee>14) lapStatus='Aumentate';
     else {
-      if(Number.isFinite(tr)){
-        if(tr<=2.8){ status='ok'; title='LAP normale (trapianto; via TR)'; pathway.push('E/e′ 7–14 + TR ≤2.8'); }
-        else { status='bad'; title='LAP elevata (trapianto; via TR)'; pathway.push('E/e′ 7–14 + TR >2.8'); }
-      } else {
-        if(Number.isFinite(pv) && pv<=0.67) crit.push('PV S/D ≤0.67');
-        if(Number.isFinite(lavi) && lavi>34) crit.push('LAVi >34');
-        if(Number.isFinite(eprime) && eprime<=6.5) crit.push('e′ ridotta');
-        if(crit.length>=1){ status='bad'; title='LAP elevata probabile (trapianto; supporto)'; }
+      if(srirvValid(srirv=srivr)){
+        const ratio = E / srivr; // E(cm/s) divided by 1/s = cm
+        details += kv('E/SRIVR (cm)', ratio.toFixed(0));
+        if(ratio>200) lapStatus='Aumentate';
+        else lapStatus='Normali';
+      }else if(TR!=null){
+        details += kv('TR', TR+' m/s');
+        lapStatus = TR>2.8 ? 'Aumentate' : 'Normali';
+      }else{
+        lapStatus='Indeterminate';
       }
     }
+  }else if(TR!=null){
+    details += kv('TR', TR+' m/s');
+    lapStatus = TR>2.8 ? 'Aumentate' : 'Normali';
   }
 
-  let key = (status==='bad') ? 'htx_lap_high' : (status==='ok' ? 'htx_lap_normal' : 'htx_indet');
+  function srirvValid(s){ return s!=null && s>0; }
 
-  const repBits = pathway.concat(crit);
-  const report = `Trapianto → ${badge(status)}. Criteri: ${repBits.join(', ')||'—'}.`;
-  const details = `<div class="kv"><div class="k">Percorso</div><div>${pathway.join(', ')||'—'}</div></div>
-  <div class="kv"><div class="k">Supporto</div><div>${crit.join(', ')||'—'}</div></div>
-  <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>
-  <p class="hint">${REFERTI[key]||''}</p>`;
-  setResult('htxResult','htxDetails',status,title,details);
-});
+  let phrase='';
+  if(lapStatus==='Aumentate') phrase='**LAP aumentate** in trapianto (criteri dedicati positivi).';
+  else if(lapStatus==='Normali') phrase='**LAP nei limiti** in trapianto (criteri dedicati favorevoli).';
+  else phrase='**Valutazione indeterminata** in trapianto; completare con misure alternative.';
 
-// Ipertensione polmonare
-document.getElementById('calcPH')?.addEventListener('click', ()=>{
-  const ea = val(document.getElementById('ph_ea').value);
-  const eel = val(document.getElementById('ph_ee_lat').value);
-  const lavi = val(document.getElementById('ph_lavi').value);
+  const out = document.getElementById('htx_result');
+  let pills = badge(`LAP: ${lapStatus}`, lapStatus==='Aumentate'?'bad':(lapStatus==='Normali'?'good':'warn'));
+  const txtCopy = `Trapianto — ${lapStatus}. ${phrase.replace(/\*\*/g,'')}`;
+  out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+}
+document.getElementById('htx_calc').addEventListener('click', htxCalc);
+
+// ---------- PH ----------
+function phCalc(){
+  const Ee_lat = val(document.getElementById('ph_Ee_lat').value);
+  const EA = val(document.getElementById('ph_EA').value);
   const lars = val(document.getElementById('ph_lars').value);
+  const lavi = val(document.getElementById('ph_lavi').value);
 
-  let status='warn', title='Indeterminato (PH)';
-  let subtype='—'; const support=[];
-  if(Number.isFinite(ea)){
-    if(ea<=0.8){ subtype='pre‑capillare'; status='ok'; title='Probabile PH pre‑capillare'; }
-    else if(ea>=2){ subtype='post‑capillare (gruppo II)'; status='bad'; title='Probabile PH post‑capillare (gruppo II)'; }
+  let lapStatus='Indeterminate';
+  if(Ee_lat!=null){
+    if(Ee_lat>13) lapStatus='Aumentate';
+    else if(Ee_lat<8) lapStatus='Normali';
     else {
-      if(Number.isFinite(eel) && eel>13) support.push('E/e′ lat >13');
-      if(Number.isFinite(lavi) && lavi>34) support.push('LAVi >34');
-      if(Number.isFinite(lars) && lars<=16) support.push('LARS ≤16%');
-      if(support.length>=1){ status='bad'; title='PH post‑capillare più probabile'; }
+      // 8–13: combine
+      const combo = ((EA!=null && EA>=2) || (lars!=null && lars<16) || (lavi!=null && lavi>34));
+      lapStatus = combo ? 'Aumentate' : 'Indeterminate';
     }
   }
 
-  let key = 'ph_indet';
-  if (subtype && /pre/i.test(subtype)) key = 'ph_precap';
-  else if (subtype && /post/i.test(subtype)) key = 'ph_postcap';
-  else key = (status==='bad') ? 'ph_postcap' : (status==='ok' ? 'ph_precap' : 'ph_indet');
+  let phrase='';
+  if(lapStatus==='Aumentate') phrase='**LAP aumentate** nel contesto di ipertensione polmonare (criteri dedicati).';
+  else if(lapStatus==='Normali') phrase='**LAP nei limiti** nel contesto di ipertensione polmonare.';
+  else phrase='**Valutazione indeterminata** (E/e′ laterale in zona grigia: integrare con E/A o LARS).';
 
-  const report = `PH → ${badge(status)}. Classificazione: ${subtype}. Supporto: ${support.join(', ')||'—'}.`;
-  const details = `<div class="kv"><div class="k">Classificazione</div><div>${subtype}</div></div>
-  <div class="kv"><div class="k">Supporto</div><div>${support.join(', ')||'—'}</div></div>
-  <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>
-  <p class="hint">${REFERTI[key]||''}</p>`;
-  setResult('phResult','phDetails',status,title,details);
-});
-
-// Blocco / LBBB / Pacing
-document.getElementById('calcBlock')?.addEventListener('click', ()=>{
-  const ea = val(document.getElementById('block_ea').value);
-  const ee = val(document.getElementById('block_ee').value);
-  const tr = val(document.getElementById('block_tr').value);
-  const lavi = val(document.getElementById('block_lavi').value);
-  const lars = val(document.getElementById('block_lars').value);
-
-  const flags=[];
-  if(Number.isFinite(ee) && ee>=14) flags.push('E/e′ ≥14');
-  if(Number.isFinite(tr) && tr>=2.8) flags.push('TR ≥2.8');
-  if(Number.isFinite(lavi) && lavi>34) flags.push('LAVi >34');
-  if(Number.isFinite(lars) && lars<=18) flags.push('LARS ≤18%');
-
-  let status='warn', title='LAP indeterminata (blocco/pacing)';
-  if(flags.length>=2){ status='bad'; title='LAP aumentata probabile (blocco/pacing)'; }
-  if(flags.length===0 && Number.isFinite(ea) && ea<=0.8){ status='ok'; title='Rilasciamento alterato probabile (E/A ≤0.8)'; }
-
-  let key = (status==='bad') ? 'block_lap_high' : (status==='ok' ? 'block_lap_normal' : 'block_indet');
-
-  const report = `Blocco/LBBB/Pacing → ${badge(status)}. Criteri: ${flags.join(', ')||'—'}.`;
-  const details = `<div class="kv"><div class="k">Criteri</div><div>${flags.join(', ')||'—'}</div></div>
-  <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>
-  <p class="hint">${REFERTI[key]||''}</p>`;
-  setResult('blockResult','blockDetails',status,title,details);
-});
-
-// Restrittiva / Amiloidosi
-document.getElementById('calcRestr')?.addEventListener('click', ()=>{
-  const ea = val(document.getElementById('restr_ea').value);
-  const dt = val(document.getElementById('restr_dt').value);
-  const ivrt = val(document.getElementById('restr_ivrt').value);
-  const epm = val(document.getElementById('restr_eprime_med').value);
-  const apex = document.getElementById('restr_apex').value;
-
-  const flags=[];
-  if(Number.isFinite(ea) && ea>=2.5) flags.push('E/A ≥2.5');
-  if(Number.isFinite(dt) && dt<150 && dt>0) flags.push('DT <150 ms');
-  if(Number.isFinite(ivrt) && ivrt<50 && ivrt>0) flags.push('IVRT <50 ms');
-  if(Number.isFinite(epm) && epm<=4) flags.push('e′ mediale ≤4 cm/s');
-  if(apex==='si') flags.push('Apical‑sparing GLS');
-
-  let status='warn', title='Compatibilità non definita (restrittiva)';
-  if(flags.length>=3){ status='bad'; title='Alta probabilità di pattern restrittivo'; }
-  else if(flags.length===0){ status='ok'; title='Bassa probabilità di pattern restrittivo'; }
-
-  let key = (status==='bad') ? 'restr_highprob' : (status==='ok' ? 'restr_lowprob' : 'restr_indet');
-
-  const report = `Restrittiva/Amiloidosi → ${badge(status)}. Indici: ${flags.join(', ')||'—'}.`;
-  const details = `<div class="kv"><div class="k">Indici</div><div>${flags.join(', ')||'—'}</div></div>
-  <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>
-  <p class="hint">${REFERTI[key]||''}</p>`;
-  setResult('restrResult','restrDetails',status,title,details);
-});
-
-// Pericardite costrittiva
-document.getElementById('calcCostr')?.addEventListener('click', ()=>{
-  const vm = val(document.getElementById('costr_resp_mitral').value);
-  const vt = val(document.getElementById('costr_resp_tric').value);
-  const epm = val(document.getElementById('costr_eprime_med').value);
-  const rev = document.getElementById('costr_reversus').value;
-
-  const flags=[];
-  if(Number.isFinite(vm) && vm>=25) flags.push('Δ mitralica ≥25%');
-  if(Number.isFinite(vt) && vt>=40) flags.push('Δ tricuspidale ≥40%');
-  if(Number.isFinite(epm) && epm>=7) flags.push('e′ mediale ≥7 cm/s');
-  if(rev==='si') flags.push('Hepatic vein diastolic reversus');
-
-  let status='warn', title='Pericardite costrittiva non definita';
-  if(flags.length>=2){ status='bad'; title='Compatibile con pericardite costrittiva'; }
-  else if(flags.length===0){ status='ok'; title='Poco compatibile con costrizione'; }
-
-  let key = (status==='bad') ? 'costr_compatible' : (status==='ok' ? 'costr_unlikely' : 'costr_indet');
-
-  const report = `Costrizione pericardica → ${badge(status)}. Segni: ${flags.join(', ')||'—'}.`;
-  const details = `<div class="kv"><div class="k">Segni</div><div>${flags.join(', ')||'—'}</div></div>
-  <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>
-  <p class="hint">${REFERTI[key]||''}</p>`;
-  setResult('costrResult','costrDetails',status,title,details);
-});
-
-// HCM
-document.getElementById('calcHcm')?.addEventListener('click', ()=>{
-  const ee = val(document.getElementById('hcm_ee').value);
-  const ea = val(document.getElementById('hcm_ea').value);
-  const lavi = val(document.getElementById('hcm_lavi').value);
-  const tr = val(document.getElementById('hcm_tr').value);
-
-  const flags=[];
-  if(Number.isFinite(ee) && ee>14) flags.push('E/e′ >14');
-  if(Number.isFinite(ea) && ea>=2) flags.push('E/A ≥2');
-  if(Number.isFinite(lavi) && lavi>34) flags.push('LAVi >34');
-  if(Number.isFinite(tr) && tr>=2.8) flags.push('TR ≥2.8');
-
-  let status='warn', title='Valutazione HCM';
-  if(flags.length>=2){ status='bad'; title='Evidenza di riempimento elevato (HCM)'; }
-  else if(flags.length===0){ status='ok'; title='Assenza di segni di riempimento elevato (HCM)'; }
-
-  let key = (status==='bad') ? 'hcm_highfill' : (status==='ok' ? 'hcm_normal' : 'hcm_indet');
-
-  const report = `HCM → ${badge(status)}. Indicatori: ${flags.join(', ')||'—'}.`;
-  const details = `<div class="kv"><div class="k">Indicatori</div><div>${flags.join(', ')||'—'}</div></div>
-  <p><button class="btn" onclick="copyReport('${report.replace(/'/g,"\\'")}')">📋 Copia risultato</button></p>
-  <p class="hint">${REFERTI[key]||''}</p>`;
-  setResult('hcmResult','hcmDetails',status,title,details);
-});
-
-// ===== Service Worker registration (GitHub Pages safe) =====
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(()=>{});
-  });
+  const out = document.getElementById('ph_result');
+  let pills = badge(`LAP: ${lapStatus}`, lapStatus==='Aumentate'?'bad':(lapStatus==='Normali'?'good':'warn'));
+  const details = kv('E/e′ laterale', Ee_lat ?? '—') + kv('Combinazioni (E/A≥2 o LARS<16% o LAVi>34)', ((EA!=null&&EA>=2)||(lars!=null&&lars<16)||(lavi!=null&&lavi>34))?'Sì':'No');
+  const txtCopy = `PH — ${lapStatus}. ${phrase.replace(/\*\*/g,'')}`;
+  out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
 }
+document.getElementById('ph_calc').addEventListener('click', phCalc);
+
+// ---------- AV/LBBB/PACING ----------
+function avCalc(){
+  const sep = yes(document.getElementById('av_sep'));
+  const onlyE = yes(document.getElementById('av_onlyE'));
+  const TR = val(document.getElementById('av_TR').value);
+  const PASP = val(document.getElementById('av_PASP').value);
+  const Ee = val(document.getElementById('av_Ee').value);
+
+  let lapStatus='Indeterminate';
+  const trpasp = (PASP!=null ? PASP>=35 : (TR!=null && TR>=2.8));
+  if(!sep || onlyE){
+    // rely on TR/PASP
+    lapStatus = trpasp ? 'Aumentate' : 'Normali';
+  }else{
+    if(Ee!=null && Ee>=14) lapStatus='Aumentate';
+    else if(trpasp) lapStatus='Aumentate';
+    else lapStatus='Normali';
+  }
+
+  let phrase='';
+  if(lapStatus==='Aumentate') phrase='**LAP aumentate** (setting di conduzione/pacing; attenzione alla ridotta accuratezza di E/e′).';
+  else phrase='**LAP nei limiti** nel setting di conduzione/pacing.';
+
+  const out = document.getElementById('av_result');
+  let pills = badge(`LAP: ${lapStatus}`, lapStatus==='Aumentate'?'bad':'good');
+  let details = kv('TR/PASP aumentati', trpasp? 'Sì':'No') + kv('E/e′ utile', (sep && !onlyE)?'Sì':'No');
+  const txtCopy = `AV/LBBB/Pacing — ${lapStatus}. ${phrase.replace(/\*\*/g,'')}`;
+  out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+}
+document.getElementById('av_calc').addEventListener('click', avCalc);
+
+// ---------- RCM ----------
+function rcmCalc(){
+  const EA = val(document.getElementById('rcm_EA').value);
+  const DT = val(document.getElementById('rcm_DT').value);
+  const IVRT = val(document.getElementById('rcm_IVRT').value);
+  const eSept = val(document.getElementById('rcm_e_sept').value);
+  const eLat  = val(document.getElementById('rcm_e_lat').value);
+
+  const meetRestr = ( (EA!=null && EA>2.5) && (DT!=null && DT<150) && (IVRT!=null && IVRT<50) );
+  const veryLowE = ((eSept!=null && eSept<=4) || (eLat!=null && eLat<=4));
+  let phrase='';
+  let lapStatus='Indeterminate', grade=null;
+  if(meetRestr && veryLowE){
+    lapStatus='Aumentate';
+    grade='Grado III';
+    phrase='**Pattern restrittivo avanzato (grado III)**, con marcato aumento delle pressioni di riempimento (coerente con cardiomiopatia restrittiva).';
+  }else if(meetRestr){
+    lapStatus='Aumentate';
+    grade='Grado III';
+    phrase='**Pattern restrittivo (grado III)**, con aumento marcato delle LAP.';
+  }else{
+    phrase='**Criteri incompleti per restrizione avanzata**; integrare con altre variabili (strain, PV, clinica).';
+  }
+
+  const out = document.getElementById('rcm_result');
+  let pills = badge(`LAP: ${lapStatus}`, lapStatus==='Aumentate'?'bad':'warn') + (grade? badge(grade,'bad') : '');
+  const details = kv('E/A > 2.5', EA!=null && EA>2.5 ? 'Sì':'No') + kv('DT < 150 ms', DT!=null && DT<150 ? 'Sì':'No') + kv('IVRT < 50 ms', IVRT!=null && IVRT<50 ? 'Sì':'No');
+  const txtCopy = `RCM — ${lapStatus}${grade? ' — '+grade:''}. ${phrase.replace(/\*\*/g,'')}`;
+  out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+}
+document.getElementById('rcm_calc').addEventListener('click', rcmCalc);
+
+// ---------- CONSTRICTIVE PERICARDITIS ----------
+function cpCalc(){
+  const mitVar = val(document.getElementById('cp_mitral_var').value);
+  const triVar = val(document.getElementById('cp_tric_var').value);
+  const hvRatio = val(document.getElementById('cp_hv_ratio').value);
+  const eMed = val(document.getElementById('cp_e_medial').value);
+  const eLat = val(document.getElementById('cp_e_lateral').value);
+
+  const mitralAbn = (mitVar!=null && mitVar>25);
+  const tricuspidAbn = (triVar!=null && triVar>40);
+  const hepaticAbn = (hvRatio!=null && hvRatio>=0.8);
+  const medialHigh = (eMed!=null && eMed>7);
+  const annulusReversus = (eMed!=null && eLat!=null && eMed>eLat);
+
+  const score = [mitralAbn,tricuspidAbn,hepaticAbn,medialHigh,annulusReversus].filter(Boolean).length;
+  let phrase='';
+  let tag='Indizi non conclusivi';
+  if(score>=3){
+    tag='Quadro suggestivo';
+    phrase='**Quadro suggestivo di costrizione pericardica** (variazioni respiratorie/venose e cinetica anulare tipiche).';
+  }else{
+    phrase='**Indizi non conclusivi** per costrizione pericardica; considerare ulteriori valutazioni (RM/invasiva).';
+  }
+
+  const out = document.getElementById('cp_result');
+  let pills = badge(tag, score>=3?'bad':'warn');
+  const details = kv('Variazione mitrale >25%', mitralAbn?'Sì':'No') + kv('Variazione tricuspide >40%', tricuspidAbn?'Sì':'No') + kv('HV end-diast./anterogrado ≥0.8', hepaticAbn?'Sì':'No') + kv('e′ mediale >7 cm/s', medialHigh?'Sì':'No') + kv('Annulus reversus', annulusReversus?'Sì':'No');
+  const txtCopy = `Costrizione — ${tag}. ${phrase.replace(/\*\*/g,'')}`;
+  out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+}
+document.getElementById('cp_calc').addEventListener('click', cpCalc);
+
+// ---------- HCM ----------
+function hcmCalc(){
+  const Ee = val(document.getElementById('hcm_Ee').value);
+  const TR = val(document.getElementById('hcm_TR').value);
+  const PASP = val(document.getElementById('hcm_PASP').value);
+  const pv_sd = val(document.getElementById('hcm_pv_sd').value);
+  const lavi = val(document.getElementById('hcm_lavi').value);
+  const EA = val(document.getElementById('hcm_EA').value);
+
+  // Multiparametric for LAP; grading by E/A
+  let abn = 0;
+  if(Ee!=null && Ee>=14) abn++;
+  if(PASP!=null? PASP>=35 : (TR!=null && TR>=2.8)) abn++;
+  if(pv_sd!=null && pv_sd<=0.67) abn++;
+  if(lavi!=null && lavi>34) abn++;
+
+  let lapStatus='Indeterminate';
+  if(abn>=2) lapStatus='Aumentate';
+  else if(abn===0) lapStatus='Normali';
+
+  // Grade
+  let grade = null;
+  if(EA!=null){
+    if(EA>=2) grade='Grado III';
+    else if(EA<=0.8) grade='Grado I';
+    else grade = (lapStatus==='Aumentate')? 'Grado II' : 'Grado I';
+  }
+
+  let phrase='';
+  if(grade==='Grado III') phrase='**Pattern restrittivo (grado III)** con marcato aumento delle LAP nel contesto HCM.';
+  else if(grade==='Grado II') phrase='**Pattern pseudonormalizzato (grado II)** con aumento delle LAP nel contesto HCM.';
+  else if(lapStatus==='Normali') phrase='**Funzione diastolica nei limiti / grado I** nel contesto HCM.';
+  else phrase='**Valutazione indeterminata**; integrare con PV/strain e clinica.';
+
+  const out = document.getElementById('hcm_result');
+  let pills = badge(`LAP: ${lapStatus}`, lapStatus==='Aumentate'?'bad':(lapStatus==='Normali'?'good':'warn'));
+  if(grade) pills += badge(grade, grade==='Grado III'?'bad':(grade==='Grado II'?'warn':'good'));
+  const details = kv('Criteri LAP positivi', `${abn}`) + (grade? kv('Grado (E/A)', grade) : '');
+  const txtCopy = `HCM — ${lapStatus}${grade? ' — '+grade:''}. ${phrase.replace(/\*\*/g,'')}`;
+  out.innerHTML = `<div class="pills">${pills}</div>${headline(phrase)}${details}${copyBlock(txtCopy)}`;
+}
+document.getElementById('hcm_calc').addEventListener('click', hcmCalc);
+
+// -------- Reset handlers --------
+document.querySelectorAll('[data-reset]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const panel = document.getElementById(btn.dataset.reset);
+    panel.querySelectorAll('input').forEach(i => { if(i.type==='checkbox') i.checked=false; else i.value=''; });
+    panel.querySelectorAll('select').forEach(s => s.selectedIndex=0);
+    const res = panel.querySelector('.result'); if(res) res.innerHTML='';
+    if(btn.dataset.reset==='sinus'){ document.getElementById('sin_age_wrap').style.display='none'; }
+  });
+});
