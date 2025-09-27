@@ -1,25 +1,23 @@
 
-/* Algoritmi implementati secondo il documento 2025 (cap. 11 e 15). */
+/* Implementazione coerente al documento 2025. Nessun riferimento esplicito mostrato. */
 
 function ageBand(age){
   if (age <= 39) return 0;
   if (age <= 65) return 1;
   return 2;
 }
-
 function ePrimeCutoffs(age){
   const band = ageBand(age);
-  const table = [
+  return [
     {s:7, l:10, a:9},
     {s:6, l:8,  a:7},
     {s:6, l:7,  a:6.5}
-  ];
-  return table[band];
+  ][band];
 }
-
 function parse(v){ const n = Number(v); return isFinite(n) ? n : null; }
 function mean(vals){ const f=vals.filter(v=>typeof v==="number"); return f.length? f.reduce((a,b)=>a+b,0)/f.length : null; }
 
+/* --- Ritmo sinusale --- */
 function sinusAlgorithm(inputs){
   const age = parse(inputs.age);
   if (age==null) return { error:"Inserire l'età (obbligatoria)." };
@@ -58,25 +56,31 @@ function sinusAlgorithm(inputs){
     lap = addpos ? "increased" : "normal";
   }
 
+  // Grading 2025
   if (EA!=null){
     if (EA>=2){ grade="III"; }
-    else if (EA<=0.8 && E!=null && E<=50){ grade = (lap==="normal" && red_e) ? "I" : (lap==="increased" ? "II" : null); }
-    else { grade = (lap==="increased") ? "II" : null; }
+    else if (EA<=0.8){
+      // Grado I se LAP normale e e' ridotta
+      grade = (lap==="normal" && red_e) ? "I" : (lap==="increased" ? "II" : null);
+    } else {
+      grade = (lap==="increased") ? "II" : null;
+    }
   } else { grade = (lap==="increased") ? "II" : null; }
 
   let description="";
   if (lap==="normal" && (!grade || grade==="I")) description = grade==="I" ?
-    "Pattern di alterato rilasciamento (grado I), con pressioni di riempimento non aumentate." :
-    "Funzione diastolica normale; pressioni di riempimento non aumentate.";
+    "Pattern diastolico da rilasciamento lento (grado I), senza evidenza di aumento delle pressioni di riempimento." :
+    "Funzione diastolica complessivamente nei limiti; pressioni di riempimento non aumentate.";
   else if (lap==="increased"){
-    if (grade==="III") description = "Pattern diastolico restrittivo (grado III), con evidenza di aumento delle pressioni di riempimento ventricolare sinistro.";
-    else if (grade==="II") description = "Disfunzione diastolica di grado II (pseudonormalizzazione), con pressioni di riempimento aumentate.";
-    else description = "Presenza di aumento delle pressioni di riempimento ventricolare sinistro.";
+    if (grade==="III") description = "Pattern diastolico restrittivo (grado III), con evidenza di aumento marcato delle pressioni di riempimento.";
+    else if (grade==="II") description = "Pattern diastolico pseudonormale (grado II), con incremento delle pressioni di riempimento sinistro.";
+    else description = "Aumento delle pressioni di riempimento ventricolare sinistro.";
   } else description = "Valutazione indeterminata: parametri discordanti o incompleti.";
 
   return { lap, grade, EA, E, A, e_s:es, e_l:el, e_av:eav, Ee_s, Ee_l, Ee_m, TR, PASP, addVars:{LARS,LAVi,PVSD,IVRT}, red_e, highEe, trpasp_abn, description };
 }
 
+/* --- Fibrillazione atriale --- */
 function afAlgorithm(inputs){
   const E=parse(inputs.E), es=parse(inputs.e_sept), DT=parse(inputs.DT);
   const TR=parse(inputs.TR), PASP=parse(inputs.PASP);
@@ -98,6 +102,32 @@ function afAlgorithm(inputs){
   return { lap, positives:pos, E, e_s:es, Ee_s, DT, TR, PASP, description };
 }
 
+/* --- Tachicardia sinusale --- */
+function tachyAlgorithm(inputs){
+  const IVRT=parse(inputs.IVRT);
+  const PVSD=parse(inputs.PV_SD); // rapporto S/D
+  const PVfrac=parse(inputs.PV_sys_frac); // % sistolica
+  const E=parse(inputs.E), es=parse(inputs.e_sept), el=parse(inputs.e_lat);
+  const eav = mean([es,el]);
+  const Ee_m=(E!=null && eav>0)? E/eav : null;
+
+  let pos=0;
+  if (IVRT!=null && IVRT<=70) pos++;
+  const pvPos = (PVfrac!=null && PVfrac<=40) || (PVSD!=null && PVSD<=0.67);
+  if (pvPos) pos++;
+  if (Ee_m!=null && Ee_m>14) pos++;
+
+  let lap="indeterminate";
+  if (pos>=2) lap="increased";
+  else if (pos===0) lap="normal";
+
+  const description = lap==="increased" ? "Tachicardia sinusale: combinazione di indici (IVRT, PV, E/e′) coerente con LAP aumentate."
+    : lap==="normal" ? "Tachicardia sinusale: indici non suggestivi per LAP aumentate."
+    : "Tachicardia sinusale: quadro non univoco; integrare con misure ripetute o post‑extrasistoliche.";
+  return { lap, IVRT, PVSD, PVfrac, Ee_m, description };
+}
+
+/* --- PH --- */
 function phAlgorithm(inputs){
   const E=parse(inputs.E), A=parse(inputs.A), EA=(E!=null&&A>0)?E/A:null;
   const el=parse(inputs.e_lat), LAVi=parse(inputs.LAVi), LARS=parse(inputs.LARS);
@@ -111,24 +141,25 @@ function phAlgorithm(inputs){
       let score=0;
       if (Ee_l!=null && Ee_l>13) score++;
       if (LAVi!=null && LAVi>34) score++;
-      if (LARS!=null && LARS<=16) score++;
+      if (LARS!=null && LARS<18) score++; // aggiornato secondo 2025
       if (score>=2){ classification="postcapillare (cuore sinistro)"; lap="increased"; }
       else if (score===0){ classification="precapillare (non cardiaca)"; lap="normal"; }
       else { classification="probabile precapillare"; lap="normal"; }
     }
   }
-  const description = lap==="increased" ? "Profilo compatibile con PH postcapillare: pressioni di riempimento aumentate."
-    : lap==="normal" ? "Profilo compatibile con PH non cardiaca (precapillare): pressioni di riempimento non aumentate."
+  const description = lap==="increased" ? "Profilo compatibile con PH post‑capillare: pressioni di riempimento aumentate."
+    : lap==="normal" ? "Profilo compatibile con PH non cardiaca (pre‑capillare): pressioni di riempimento non aumentate."
     : "Valutazione indeterminata per PH.";
   return { EA, E, A, e_l:el, Ee_l, LAVi, LARS, classification, lap, description };
 }
 
+/* --- Valvulopatie --- */
 function valvAlgorithm(inputs){
   const type=inputs.type;
   const E=parse(inputs.E), A=parse(inputs.A), EA=(E!=null&&A>0)?E/A:null;
   const IVRT=parse(inputs.IVRT), IVRTover=parse(inputs.IVRT_over_TEe), ArA=parse(inputs.ArA);
   const es=parse(inputs.e_sept), el=parse(inputs.e_lat);
-  const eav= (es!=null||el!=null)? ( (es||0)+(el||0) ) / ([es,el].filter(x=>x!=null).length) : null;
+  const eav= mean([es,el]);
   const EFdep = inputs.lowEF===true;
 
   let lap="indeterminate", description="";
@@ -165,9 +196,10 @@ function valvAlgorithm(inputs){
   return { lap, description, EA, E, A, IVRT, ArA, IVRT_over_TEe:IVRTover };
 }
 
+/* --- Trapianto --- */
 function htxAlgorithm(inputs){
   const E=parse(inputs.E), es=parse(inputs.e_sept), el=parse(inputs.e_lat);
-  const eav = (es!=null||el!=null)? ( (es||0)+(el||0) ) / ([es,el].filter(x=>x!=null).length) : null;
+  const eav = mean([es,el]);
   const Ee_m=(E!=null && eav>0)? E/eav : null;
   const SRIVR=parse(inputs.SRIVR), TR=parse(inputs.TR);
 
@@ -187,15 +219,16 @@ function htxAlgorithm(inputs){
   return { lap, Ee_m, SRIVR, TR, description };
 }
 
+/* --- LVAD --- */
 function lvadAlgorithm(inputs){
   const E=parse(inputs.E), A=parse(inputs.A), EA=(E!=null&&A>0)?E/A:null;
   const RAP=parse(inputs.RAP), PASP=parse(inputs.PASP);
   const es=parse(inputs.e_sept), el=parse(inputs.e_lat);
-  const eav = (es!=null||el!=null)? ( (es||0)+(el||0) ) / ([es,el].filter(x=>x!=null).length) : null;
+  const eav = mean([es,el]);
   const Ee_m=(E!=null && eav>0)? E/eav : null;
   const Ee_s=(E!=null && es>0)? E/es : null;
   const LAVi=parse(inputs.LAVi);
-  const IAS=inputs.IAS; // "neutral" | "bulge_right" | "bulge_left"
+  const IAS=inputs.IAS;
 
   let criteria=0;
   if (EA!=null && EA>2) criteria++;
@@ -212,6 +245,7 @@ function lvadAlgorithm(inputs){
   return { lap, criteria, EA, RAP, PASP, Ee_m, Ee_s, LAVi, IAS, description };
 }
 
+/* --- AV block / pacing --- */
 function avbAlgorithm(inputs){
   const fused = inputs.fusion===true;
   const TR=parse(inputs.TR), PASP=parse(inputs.PASP);
@@ -226,43 +260,31 @@ function avbAlgorithm(inputs){
   return { lap, fused, TR, PASP, description };
 }
 
+/* --- Restrittiva --- */
 function rcmAlgorithm(inputs){
   const E=parse(inputs.E), A=parse(inputs.A), EA=(E!=null&&A>0)?E/A:null;
   const DT=parse(inputs.DT), IVRT=parse(inputs.IVRT);
-  const el=parse(inputs.e_lat), es=parse(inputs.e_sept);
-  const veryLow_e = ((el!=null && el<=4) || (es!=null && es<=4));
-  const restrictive = (EA!=null && EA>2.5) && (DT!=null && DT<150) && (IVRT!=null && IVRT<50);
+  const es=parse(inputs.e_sept), el=parse(inputs.e_lat);
+  const eav = mean([es,el]);
+  const Ee_m=(E!=null && eav>0)? E/eav : null;
+
+  // Criteri ammessi (2025): EA>2.5, DT<140 ms, IVRT<50 ms, E/e' medio >14
+  let pos=0;
+  if (EA!=null && EA>2.5) pos++;
+  if (DT!=null && DT<140) pos++;
+  if (IVRT!=null && IVRT<50) pos++;
+  if (Ee_m!=null && Ee_m>14) pos++;
 
   let lap="indeterminate";
-  if (restrictive || (EA!=null && EA>=2 && veryLow_e)) lap="increased";
+  if (pos>=2) lap="increased";
+  else if (pos===0) lap="indeterminate"; // in questo contesto evitiamo "normale"
 
-  const description = lap==="increased" ? "Restrittiva: pattern restrittivo o e′ molto ridotto con LAP aumentate."
-    : "Restrittiva: criteri non soddisfatti o insufficienti.";
-  return { lap, EA, DT, IVRT, e_l:el, e_s:es, description };
+  const description = lap==="increased" ? "Cardiomiopatia restrittiva: combinazione di indici (≥2) coerente con LAP aumentate."
+    : "Cardiomiopatia restrittiva: criteri insufficienti per definire LAP aumentate.";
+  return { lap, EA, DT, IVRT, Ee_m, description };
 }
 
-function consAlgorithm(inputs){
-  const hepatic=parse(inputs.hep_rev_ratio);
-  const medial_e=parse(inputs.medial_e);
-  const tv_insp=parse(inputs.tv_var);
-  const mv_insp=parse(inputs.mv_var);
-  const annulus_reversus = inputs.annulus_reversus===true;
-  const strain_reversus  = inputs.strain_reversus===true;
-
-  let flags=0;
-  if (hepatic!=null && hepatic>=0.8) flags++;
-  if (medial_e!=null && medial_e>7) flags++;
-  if (tv_insp!=null && tv_insp>40) flags++;
-  if (mv_insp!=null && mv_insp>25) flags++;
-  if (annulus_reversus) flags++;
-  if (strain_reversus) flags++;
-
-  const present = flags>=3;
-  const description = present ? "Costrizione pericardica: segni suggestivi presenti (≥3)."
-    : "Costrizione pericardica: criteri non sufficienti.";
-  return { present, flags, description };
-}
-
+/* --- HCM --- */
 function hcmAlgorithm(inputs){
   const E=parse(inputs.E), el=parse(inputs.e_lat), es=parse(inputs.e_sept);
   const Ee_l=(E!=null && el>0)?E/el:null;
@@ -284,4 +306,6 @@ function hcmAlgorithm(inputs){
   return { lap, Ee_l, Ee_s, LAVi, TR, description };
 }
 
-window.FDN = { sinusAlgorithm, afAlgorithm, phAlgorithm, valvAlgorithm, htxAlgorithm, lvadAlgorithm, avbAlgorithm, rcmAlgorithm, consAlgorithm, hcmAlgorithm };
+window.FDN = { sinusAlgorithm, afAlgorithm, tachyAlgorithm, phAlgorithm, valvAlgorithm, htxAlgorithm, lvadAlgorithm, avbAlgorithm, rcmAlgorithm, consAlgorithm: null, hcmAlgorithm };
+
+// Nota: consAlgorithm (costrizione) rimane invariata rispetto alla v32b ed è gestita nello script app.js via funzione locale per semplicità.

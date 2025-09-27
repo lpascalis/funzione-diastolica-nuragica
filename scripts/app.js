@@ -34,6 +34,26 @@ document.addEventListener("click",(e)=>{
   }
 });
 
+/* costrizione locale (come v32b) */
+function consAlgorithm(inputs){
+  const hepatic=Number(inputs.hep_rev_ratio);
+  const medial_e=Number(inputs.medial_e);
+  const tv_insp=Number(inputs.tv_var);
+  const mv_insp=Number(inputs.mv_var);
+  const annulus_reversus = !!inputs.annulus_reversus;
+  const strain_reversus  = !!inputs.strain_reversus;
+  let flags=0;
+  if (isFinite(hepatic) && hepatic>=0.8) flags++;
+  if (isFinite(medial_e) && medial_e>7) flags++;
+  if (isFinite(tv_insp) && tv_insp>40) flags++;
+  if (isFinite(mv_insp) && mv_insp>25) flags++;
+  if (annulus_reversus) flags++;
+  if (strain_reversus) flags++;
+  const present = flags>=3;
+  const description = present ? "Costrizione pericardica: segni suggestivi presenti (≥3)." : "Costrizione pericardica: criteri non sufficienti.";
+  return { present, flags, description };
+}
+
 function renderSinus(root){
   root.innerHTML="";
   root.appendChild(section("Ritmo sinusale (stima LAP e grading)"));
@@ -87,6 +107,32 @@ function renderAF(root){
     res.innerHTML=""; res.appendChild(resultBox([`LAP: <b>${lapTxt}</b>`])); 
     res.appendChild(el("div",{class:"kpi"},[el("span",{class:"pill"},["Commento"]), el("div",{class:"desc"},[out.description])]));
     lastCopyText = `AF: LAP ${lapTxt}. ${out.description}`;
+  });
+  root.appendChild(btn);
+}
+
+function renderTachy(root){
+  root.innerHTML="";
+  root.appendChild(section("Tachicardia sinusale"));
+  const g=el("div",{class:"grid"});
+  g.append(
+    field("tIVRT","IVRT (ms)"),
+    field("tPVSD","Vene polmonari S/D (rapporto)"),
+    field("tPVfrac","Frazione sistolica vene polmonari (%)"),
+    field("tE","Mitral E (cm/s)"),
+    field("teS","e′ settale (cm/s)"),
+    field("teL","e′ laterale (cm/s)")
+  );
+  root.appendChild(el("div",{class:"card small"},["Suggerimento: se E/A fusi, usa battito post‑extrasistolico per separare i picchi."]));
+  root.appendChild(g);
+  const res=el("div",{class:"result"}); root.appendChild(res);
+  const btn=el("button",{class:"btn",html:"Calcola"});
+  btn.addEventListener("click",()=>{
+    const out=FDN.tachyAlgorithm({IVRT:tIVRT.value, PV_SD:tPVSD.value, PV_sys_frac:tPVfrac.value, E:tE.value, e_sept:teS.value, e_lat:teL.value});
+    const lapTxt = out.lap==="increased" ? "aumentate" : out.lap==="normal" ? "normali" : "indeterminate";
+    res.innerHTML=""; res.appendChild(resultBox([`LAP: <b>${lapTxt}</b>`])); 
+    res.appendChild(el("div",{class:"kpi"},[el("span",{class:"pill"},["Commento"]), el("div",{class:"desc"},[out.description])]));
+    lastCopyText = `Tachicardia sinusale: LAP ${lapTxt}. ${out.description}`;
   });
   root.appendChild(btn);
 }
@@ -201,7 +247,7 @@ function renderCONS(root){
   root.append(g,flags); const res=el("div",{class:"result"}); root.appendChild(res);
   const btn=el("button",{class:"btn",html:"Valuta"});
   btn.addEventListener("click",()=>{
-    const out=FDN.consAlgorithm({hep_rev_ratio:consHEP.value, medial_e:consME.value, tv_var:consTV.value, mv_var:consMV.value, annulus_reversus:annrev.checked, strain_reversus:strrev.checked});
+    const out=consAlgorithm({hep_rev_ratio:consHEP.value, medial_e:consME.value, tv_var:consTV.value, mv_var:consMV.value, annulus_reversus:annrev.checked, strain_reversus:strrev.checked});
     res.innerHTML=""; res.appendChild(resultBox([out.description])); lastCopyText = `Costrizione: ${out.description}`;
   });
   root.appendChild(btn);
@@ -226,6 +272,7 @@ function render(view){
   const root=document.getElementById("view");
   if (view==="sinus") return renderSinus(root);
   if (view==="af")    return renderAF(root);
+  if (view==="tachy") return renderTachy(root);
   if (view==="ph")    return renderPH(root);
   if (view==="valv")  return renderValv(root);
   if (view==="htx")   return renderHTX(root);

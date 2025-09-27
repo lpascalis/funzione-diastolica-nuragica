@@ -4,17 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="FD Nuragica" />
+  <meta name="theme-color" content="#0A84FF" />
   <title>Funzione Diastolica Nuragica</title>
-  <link rel="icon" href="assets/favicon.png" />
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
-  <link rel="stylesheet" href="styles.css?v=32b" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-180.png" />
+  <link rel="stylesheet" href="styles.css?v=34" />
 </head>
 <body>
   <header class="nav">
     <div class="nav-row">
       <div class="title-wrap">
-        <img class='logo' src='assets/logo.jpg' alt='logo'/>
+        <img class='logo' src='assets/icons/icon-180.png' alt='logo'/>
         <div>
           <div class="overline">Calcolatori ecocardiografici</div>
           <h1 class="title">Funzione Diastolica Nuragica</h1>
@@ -28,6 +31,7 @@
     <div class="segmented" id="tabs">
       <button data-view="sinus" class="seg active">Ritmo sinusale</button>
       <button data-view="af" class="seg">Fibrillazione atriale</button>
+      <button data-view="tachy" class="seg">Tachicardia sinusale</button>
       <button data-view="valv" class="seg">Valvulopatie</button>
       <button data-view="ph" class="seg">Ipertensione polmonare</button>
       <button data-view="htx" class="seg">Trapianto</button>
@@ -42,11 +46,16 @@
   <main id="view" class="view"></main>
 
   <footer class="foot">
-    <div class="muted">Build 2025-09-27 15:05</div>
+    <div class="muted">Build v34 PWA</div>
     <div class="muted">Ottimizzata per iPhone · tema chiaro</div>
   </footer>
 
-  <script src="scripts/algorithms.js?v=32b"></script>
-  <script src="scripts/app.js?v=32b"></script>
+  <div id="toast" class="copy-toast"></div>
+
+  <script src="scripts/algorithms.js?v=34"></script>
+  <script src="scripts/app.js?v=34"></script>
+  <script>
+    if ('serviceWorker' in navigator) {{ navigator.serviceWorker.register('./sw.js'); }}
+  </script>
 </body>
 </html>

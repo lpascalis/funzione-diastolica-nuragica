@@ -1,10 +1,12 @@
 {
   "name": "Funzione Diastolica Nuragica",
-  "short_name": "Nuragica",
-  "start_url": "./index.html",
+  "short_name": "FD Nuragica",
+  "description": "Calcolatori per la valutazione della funzione diastolica, ottimizzati per iPhone.",
+  "start_url": "./?source=pwa",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#06b6d4",
+  "background_color": "#ffffff",
+  "theme_color": "#0A84FF",
   "icons": [
     {
       "src": "assets/icons/icon-192.png",
@@ -12,13 +14,13 @@
       "type": "image/png"
     },
     {
-      "src": "assets/icons/icon-256.png",
-      "sizes": "256x256",
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "assets/icons/icon-512.png",
-      "sizes": "512x512",
+      "src": "assets/icons/icon-180.png",
+      "sizes": "180x180",
       "type": "image/png",
       "purpose": "any maskable"
     }
