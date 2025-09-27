@@ -7,8 +7,6 @@
   --border:#E5E7EB;
   --tint:#0A84FF;
   --tint-weak:rgba(10,132,255,.08);
-  --success:#0F766E;
-  --danger:#B91C1C;
 }
 *{box-sizing:border-box}
 html,body{height:100%;scroll-behavior:smooth}
@@ -21,12 +19,7 @@ body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
-.nav{
-  position:sticky;top:0;z-index:50;
-  background:rgba(255,255,255,.9);
-  backdrop-filter:saturate(1.1) blur(10px);
-  border-bottom:1px solid var(--border);
-}
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-filter:saturate(1.1) blur(10px);border-bottom:1px solid var(--border)}
 .nav-row{display:flex; align-items:center; justify-content:space-between;padding:10px 12px 6px}
 .title-wrap{display:flex; gap:10px; align-items:center}
 .logo{width:36px;height:36px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
@@ -34,40 +27,27 @@ body{
 .title{font-size:18px;line-height:1.2;margin:0}
 .actions{display:flex;gap:8px}
 .segmented{display:flex; flex-wrap:nowrap; gap:8px; overflow-x:auto; padding:0 12px 10px; -webkit-overflow-scrolling:touch;}
-.seg{
-  border:1px solid var(--border); background:#fff; color:var(--text);
-  padding:8px 12px; border-radius:999px; font-size:13px; white-space:nowrap; cursor:pointer;
-}
+.seg{border:1px solid var(--border); background:#fff; color:var(--text);padding:8px 12px; border-radius:999px; font-size:13px; white-space:nowrap; cursor:pointer}
 .seg.active{ background:var(--tint-weak); border-color:#BFDBFE }
 .view{ padding:14px; max-width:900px; margin:0 auto }
-.card{
-  background:var(--card); border:1px solid var(--border); border-radius:14px;
-  padding:12px; margin-bottom:12px; box-shadow:0 1px 0 rgba(0,0,0,.02); position:relative;
-}
+.card{background:var(--card); border:1px solid var(--border); border-radius:14px;padding:12px; margin-bottom:12px; box-shadow:0 1px 0 rgba(0,0,0,.02); position:relative}
 h2{font-size:16px;margin:6px 0 8px}
 h3{font-size:13px;margin:6px 0;color:var(--muted)}
 .grid{display:grid; gap:10px; grid-template-columns:1fr 1fr}
 @media (max-width: 720px){ .grid{grid-template-columns:1fr} }
 label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:4px}
-input,select{
-  width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-  background:#fff;color:var(--text);font-size:16px;
-}
+input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:16px}
 input.invalid{border-color:#F59E0B; background:#FFFBEB}
 .small{font-size:12px;color:var(--muted)}
 hr{border:none;border-top:1px dashed var(--border);margin:8px 0}
 .kpi{display:flex;gap:10px;align-items:center;margin-top:8px}
 .pill{padding:6px 8px;border-radius:10px;background:var(--tint-weak);border:1px dashed #BFDBFE;font-weight:600;font-size:13px}
-.result-box{
-  border-left:4px solid var(--tint);
-  background:linear-gradient(180deg, rgba(239,246,255,.7), rgba(255,255,255,.9));
-  padding:10px 12px;border-radius:12px;margin-top:8px
-}
+.result-box{border-left:4px solid var(--tint);background:linear-gradient(180deg, rgba(239,246,255,.7), rgba(255,255,255,.9));padding:10px 12px;border-radius:12px;margin-top:8px}
 .btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
 .btn.ghost{background:transparent}
 .foot{position:sticky;bottom:0;background:rgba(255,255,255,.95);border-top:1px solid var(--border);padding:8px 12px;display:flex;gap:16px;justify-content:space-between}
 .muted{font-size:12px;color:var(--muted)}
-.copy-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;background:#111;color:#fff;padding:8px 12px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s, transform .2s;}
+.copy-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;background:#111;color:#fff;padding:8px 12px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s, transform .2s}
 .copy-toast.show{opacity:1; transform:translateX(-50%) translateY(-6px)}
 .info{border:1px solid var(--border);background:#F8FAFC;border-radius:999px;padding:0 6px;font-size:11px;color:#334155}
 .hint{position:absolute;right:12px;top:12px;background:#111;color:#fff;padding:8px 10px;border-radius:10px;font-size:12px;max-width:260px;display:none}

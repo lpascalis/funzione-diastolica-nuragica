@@ -1,5 +1,85 @@
 
 let lastCopyText = "";
+const HINTS = {
+  age: "Necessaria per cut‑off e′ (fasce 20‑39 / 40‑65 / >65).",
+  E: "Velocità E al Doppler transmitralico (cm/s).",
+  A: "Velocità A al Doppler transmitralico (cm/s).",
+  DT: "Deceleration time di E (ms).",
+  eS: "TDI annulus settale (cm/s).",
+  eL: "TDI annulus laterale (cm/s).",
+  TR: "Velocità rigurgito tricuspidale (m/s).",
+  PASP: "Pressione sistolica polmonare stimata (mmHg).",
+  LARS: "Left Atrial Reservoir Strain (%).",
+  LAVi: "Left Atrial Volume indicizzato (mL/m²).",
+  PVSD: "Rapporto S/D vene polmonari (≤0.67 ≈ frazione sistolica ≤40%).",
+  IVRT: "Isovolumic Relaxation Time (ms).",
+  afE: "E in FA (media di 5‑10 battiti).",
+  afeS: "e′ settale in FA.",
+  afDT: "DT medio in FA.",
+  afTR: "TR picco (m/s).",
+  afPASP: "PASP stimata (mmHg).",
+  phE: "E (cm/s)",
+  phA: "A (cm/s)",
+  pheL: "e′ laterale (cm/s)",
+  phLAVi: "LAVi (mL/m²)",
+  phLARS: "LARS (%)",
+  valvE: "E (cm/s)",
+  valvA: "A (cm/s)",
+  valvIVRT: "IVRT (ms)",
+  valvIVRTTE: "IVRT/(TE−e′)",
+  valvArA: "Ar−A (ms)",
+  valveS: "e′ settale (cm/s)",
+  valveL: "e′ laterale (cm/s)",
+  htxE: "E (cm/s)",
+  htxeS: "e′ settale",
+  htxeL: "e′ laterale",
+  htxSR: "Somma SRIVR (3 viste)",
+  htxTR: "TR (m/s)",
+  lvE: "E (cm/s)",
+  lvA: "A (cm/s)",
+  lvRAP: "RAP (mmHg)",
+  lvPASP: "PASP (mmHg)",
+  lveS: "e′ settale",
+  lveL: "e′ laterale",
+  lvLAVi: "LAVi",
+  avTR: "TR (m/s)",
+  avPASP: "PASP (mmHg)",
+  rcmE: "E (cm/s)",
+  rcmA: "A (cm/s)",
+  rcmDT: "DT (ms)",
+  rcmIVRT: "IVRT (ms)",
+  rcmeS: "e′ settale (cm/s)",
+  rcmeL: "e′ laterale (cm/s)",
+  consHEP: "Rapporto inversione telediastolica / anterograda (vene epatiche)",
+  consME: "e′ mediale (cm/s)",
+  consTV: "Variazione Doppler TV con respiro (%)",
+  consMV: "Variazione Doppler MV con respiro (%)",
+  hcmE: "E (cm/s)",
+  hcmeS: "e′ settale",
+  hcmeL: "e′ laterale",
+  hcmLAVi: "LAVi (mL/m²)",
+  hcmTR: "TR (m/s)",
+  tIVRT: "IVRT (ms)",
+  tPVSD: "S/D vene polmonari",
+  tPVfrac: "Frazione sistolica PV (%)",
+  tE: "E (cm/s)",
+  teS: "e′ settale",
+  teL: "e′ laterale",
+};
+const MINMAX = {
+  E:[20,200], A:[20,160], DT:[80,300], eS:[2,20], eL:[3,25], TR:[1.5,5], PASP:[10,90],
+  LARS:[5,45], LAVi:[8,120], PVSD:[0.3,2], IVRT:[40,120],
+  afE:[20,200], afeS:[2,20], afDT:[80,300], afTR:[1.5,5], afPASP:[10,90],
+  phE:[20,200], phA:[20,160], pheL:[3,25], phLAVi:[8,120], phLARS:[5,45],
+  valvE:[20,200], valvA:[20,160], valvIVRT:[40,120], valvIVRTTE:[2,8], valvArA:[-50,100], valveS:[2,20], valveL:[3,25],
+  htxE:[20,200], htxeS:[2,20], htxeL:[3,25], htxSR:[20,400], htxTR:[1.5,5],
+  lvE:[20,200], lvA:[20,160], lvRAP:[0,25], lvPASP:[10,90], lveS:[2,20], lveL:[3,25], lvLAVi:[8,120],
+  avTR:[1.5,5], avPASP:[10,90],
+  rcmE:[20,200], rcmA:[20,160], rcmDT:[80,300], rcmIVRT:[40,120], rcmeS:[2,20], rcmeL:[3,25],
+  consHEP:[0.3,1.5], consME:[5,20], consTV:[0,100], consMV:[0,100],
+  hcmE:[20,200], hcmeS:[2,20], hcmeL:[3,25], hcmLAVi:[8,120], hcmTR:[1.5,5],
+  tIVRT:[40,120], tPVSD:[0.3,2], tPVfrac:[10,90], tE:[20,200], teS:[2,20], teL:[3,25]
+};
 
 function el(tag, attrs={}, children=[]){
   const n=document.createElement(tag);
@@ -13,15 +93,27 @@ function el(tag, attrs={}, children=[]){
   for (const c of children) n.appendChild(typeof c==="string" ? document.createTextNode(c) : c);
   return n;
 }
+function infoButton(id){ return el("button",{type:"button",class:"info",onclick:()=>{ const card=document.getElementById(id).closest(".card"); card.classList.toggle("show-hint"); }},["ⓘ"]); }
 function section(t){ return el("h2",{},[t]); }
 function field(id,label,type="number",placeholder="",step="any"){ 
-  return el("div",{class:"card"},[ el("label",{for:id},[label]), el("input",{id,type,placeholder,step,inputmode:"decimal"}) ]);
+  const wrap=el("div",{class:"card"});
+  const lbl=el("label",{for:id},[label, infoButton(id)]);
+  const inp=el("input",{id,type,placeholder,step,inputmode:"decimal"});
+  const hint=el("div",{class:"hint"},[HINTS[id]||""]);
+  wrap.append(lbl, inp, hint);
+  inp.addEventListener("input",()=>validate(inp,id));
+  return wrap;
+}
+function validate(inp,id){
+  const mm=MINMAX[id]; if(!mm) return;
+  const v=Number(inp.value); const bad = isFinite(v) && (v<mm[0] || v>mm[1]);
+  inp.classList.toggle("invalid", bad);
 }
 function resultBox(lines){ const b=el("div",{class:"result-box"}); lines.forEach(l=>b.appendChild(el("div",{html:l}))); return b; }
 function small(t){ return el("div",{class:"small"},[t]); }
 function setActive(view){ document.querySelectorAll(".seg").forEach(s=>s.classList.toggle("active", s.dataset.view===view)); }
 function clearAllInputs(){ document.querySelectorAll("input").forEach(i=> i.type==="checkbox"||i.type==="radio" ? (i.checked=false) : (i.value="")); document.querySelectorAll(".result").forEach(r=> r.innerHTML=""); lastCopyText=""; }
-function copyToast(msg){ const t=el("div",{class:"copy-toast"},[msg]); document.body.appendChild(t); setTimeout(()=>t.classList.add("show"),10); setTimeout(()=>{t.classList.remove("show"); setTimeout(()=>t.remove(),200);},1800); }
+function copyToast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>{t.classList.remove("show")},1800); }
 
 document.addEventListener("click",(e)=>{
   if (e.target.matches("#copyBtn")){
@@ -34,7 +126,7 @@ document.addEventListener("click",(e)=>{
   }
 });
 
-/* costrizione locale (come v32b) */
+/* Costrizione: funzione locale */
 function consAlgorithm(inputs){
   const hepatic=Number(inputs.hep_rev_ratio);
   const medial_e=Number(inputs.medial_e);
@@ -282,5 +374,4 @@ function render(view){
   if (view==="cons")  return renderCONS(root);
   if (view==="hcm")   return renderHCM(root);
 }
-
 render("sinus");

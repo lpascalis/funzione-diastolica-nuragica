@@ -1,11 +1,11 @@
 
-const CACHE_VERSION = 'fdn-v34-202509271517';
+const CACHE_VERSION = 'fdn-v35-202509271524';
 const PRECACHE_URLS = [
   './',
   './index.html',
-  './styles.css?v=34',
-  './scripts/algorithms.js?v=34',
-  './scripts/app.js?v=34',
+  './styles.css?v=35',
+  './scripts/algorithms.js?v=35',
+  './scripts/app.js?v=35',
   './manifest.webmanifest',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',

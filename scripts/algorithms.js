@@ -1,6 +1,4 @@
 
-/* Implementazione coerente al documento 2025. Nessun riferimento esplicito mostrato. */
-
 function ageBand(age){
   if (age <= 39) return 0;
   if (age <= 65) return 1;
@@ -17,13 +15,12 @@ function ePrimeCutoffs(age){
 function parse(v){ const n = Number(v); return isFinite(n) ? n : null; }
 function mean(vals){ const f=vals.filter(v=>typeof v==="number"); return f.length? f.reduce((a,b)=>a+b,0)/f.length : null; }
 
-/* --- Ritmo sinusale --- */
+/* Ritmo sinusale */
 function sinusAlgorithm(inputs){
   const age = parse(inputs.age);
   if (age==null) return { error:"Inserire l'età (obbligatoria)." };
 
   const E=parse(inputs.E), A=parse(inputs.A), EA=(E!=null&&A>0)?E/A:null;
-  const DT=parse(inputs.DT);
   const es=parse(inputs.e_sept), el=parse(inputs.e_lat);
   const eav = mean([es,el]);
   const Ee_s=(E!=null&&es>0)?E/es:null;
@@ -56,11 +53,9 @@ function sinusAlgorithm(inputs){
     lap = addpos ? "increased" : "normal";
   }
 
-  // Grading 2025
   if (EA!=null){
     if (EA>=2){ grade="III"; }
     else if (EA<=0.8){
-      // Grado I se LAP normale e e' ridotta
       grade = (lap==="normal" && red_e) ? "I" : (lap==="increased" ? "II" : null);
     } else {
       grade = (lap==="increased") ? "II" : null;
@@ -80,7 +75,7 @@ function sinusAlgorithm(inputs){
   return { lap, grade, EA, E, A, e_s:es, e_l:el, e_av:eav, Ee_s, Ee_l, Ee_m, TR, PASP, addVars:{LARS,LAVi,PVSD,IVRT}, red_e, highEe, trpasp_abn, description };
 }
 
-/* --- Fibrillazione atriale --- */
+/* Fibrillazione atriale */
 function afAlgorithm(inputs){
   const E=parse(inputs.E), es=parse(inputs.e_sept), DT=parse(inputs.DT);
   const TR=parse(inputs.TR), PASP=parse(inputs.PASP);
@@ -102,11 +97,11 @@ function afAlgorithm(inputs){
   return { lap, positives:pos, E, e_s:es, Ee_s, DT, TR, PASP, description };
 }
 
-/* --- Tachicardia sinusale --- */
+/* Tachicardia sinusale */
 function tachyAlgorithm(inputs){
   const IVRT=parse(inputs.IVRT);
-  const PVSD=parse(inputs.PV_SD); // rapporto S/D
-  const PVfrac=parse(inputs.PV_sys_frac); // % sistolica
+  const PVSD=parse(inputs.PV_SD);
+  const PVfrac=parse(inputs.PV_sys_frac);
   const E=parse(inputs.E), es=parse(inputs.e_sept), el=parse(inputs.e_lat);
   const eav = mean([es,el]);
   const Ee_m=(E!=null && eav>0)? E/eav : null;
@@ -127,7 +122,7 @@ function tachyAlgorithm(inputs){
   return { lap, IVRT, PVSD, PVfrac, Ee_m, description };
 }
 
-/* --- PH --- */
+/* Ipertensione polmonare */
 function phAlgorithm(inputs){
   const E=parse(inputs.E), A=parse(inputs.A), EA=(E!=null&&A>0)?E/A:null;
   const el=parse(inputs.e_lat), LAVi=parse(inputs.LAVi), LARS=parse(inputs.LARS);
@@ -141,7 +136,7 @@ function phAlgorithm(inputs){
       let score=0;
       if (Ee_l!=null && Ee_l>13) score++;
       if (LAVi!=null && LAVi>34) score++;
-      if (LARS!=null && LARS<18) score++; // aggiornato secondo 2025
+      if (LARS!=null && LARS<18) score++;
       if (score>=2){ classification="postcapillare (cuore sinistro)"; lap="increased"; }
       else if (score===0){ classification="precapillare (non cardiaca)"; lap="normal"; }
       else { classification="probabile precapillare"; lap="normal"; }
@@ -153,7 +148,7 @@ function phAlgorithm(inputs){
   return { EA, E, A, e_l:el, Ee_l, LAVi, LARS, classification, lap, description };
 }
 
-/* --- Valvulopatie --- */
+/* Valvulopatie */
 function valvAlgorithm(inputs){
   const type=inputs.type;
   const E=parse(inputs.E), A=parse(inputs.A), EA=(E!=null&&A>0)?E/A:null;
@@ -196,7 +191,7 @@ function valvAlgorithm(inputs){
   return { lap, description, EA, E, A, IVRT, ArA, IVRT_over_TEe:IVRTover };
 }
 
-/* --- Trapianto --- */
+/* Trapianto */
 function htxAlgorithm(inputs){
   const E=parse(inputs.E), es=parse(inputs.e_sept), el=parse(inputs.e_lat);
   const eav = mean([es,el]);
@@ -219,7 +214,7 @@ function htxAlgorithm(inputs){
   return { lap, Ee_m, SRIVR, TR, description };
 }
 
-/* --- LVAD --- */
+/* LVAD */
 function lvadAlgorithm(inputs){
   const E=parse(inputs.E), A=parse(inputs.A), EA=(E!=null&&A>0)?E/A:null;
   const RAP=parse(inputs.RAP), PASP=parse(inputs.PASP);
@@ -245,7 +240,7 @@ function lvadAlgorithm(inputs){
   return { lap, criteria, EA, RAP, PASP, Ee_m, Ee_s, LAVi, IAS, description };
 }
 
-/* --- AV block / pacing --- */
+/* AV block / pacing */
 function avbAlgorithm(inputs){
   const fused = inputs.fusion===true;
   const TR=parse(inputs.TR), PASP=parse(inputs.PASP);
@@ -260,7 +255,7 @@ function avbAlgorithm(inputs){
   return { lap, fused, TR, PASP, description };
 }
 
-/* --- Restrittiva --- */
+/* Restrittiva */
 function rcmAlgorithm(inputs){
   const E=parse(inputs.E), A=parse(inputs.A), EA=(E!=null&&A>0)?E/A:null;
   const DT=parse(inputs.DT), IVRT=parse(inputs.IVRT);
@@ -268,7 +263,6 @@ function rcmAlgorithm(inputs){
   const eav = mean([es,el]);
   const Ee_m=(E!=null && eav>0)? E/eav : null;
 
-  // Criteri ammessi (2025): EA>2.5, DT<140 ms, IVRT<50 ms, E/e' medio >14
   let pos=0;
   if (EA!=null && EA>2.5) pos++;
   if (DT!=null && DT<140) pos++;
@@ -277,14 +271,13 @@ function rcmAlgorithm(inputs){
 
   let lap="indeterminate";
   if (pos>=2) lap="increased";
-  else if (pos===0) lap="indeterminate"; // in questo contesto evitiamo "normale"
 
   const description = lap==="increased" ? "Cardiomiopatia restrittiva: combinazione di indici (≥2) coerente con LAP aumentate."
     : "Cardiomiopatia restrittiva: criteri insufficienti per definire LAP aumentate.";
   return { lap, EA, DT, IVRT, Ee_m, description };
 }
 
-/* --- HCM --- */
+/* HCM */
 function hcmAlgorithm(inputs){
   const E=parse(inputs.E), el=parse(inputs.e_lat), es=parse(inputs.e_sept);
   const Ee_l=(E!=null && el>0)?E/el:null;
@@ -306,6 +299,4 @@ function hcmAlgorithm(inputs){
   return { lap, Ee_l, Ee_s, LAVi, TR, description };
 }
 
-window.FDN = { sinusAlgorithm, afAlgorithm, tachyAlgorithm, phAlgorithm, valvAlgorithm, htxAlgorithm, lvadAlgorithm, avbAlgorithm, rcmAlgorithm, consAlgorithm: null, hcmAlgorithm };
-
-// Nota: consAlgorithm (costrizione) rimane invariata rispetto alla v32b ed è gestita nello script app.js via funzione locale per semplicità.
+window.FDN = { sinusAlgorithm, afAlgorithm, tachyAlgorithm, phAlgorithm, valvAlgorithm, htxAlgorithm, lvadAlgorithm, avbAlgorithm, rcmAlgorithm, hcmAlgorithm };
