@@ -9,12 +9,12 @@
   <meta name="theme-color" content="#ffffff" />
   <link rel="icon" href="assets/favicon.png" type="image/png"/>
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png"/>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=31b" />
 </head>
 <body>
 <header class="app-header">
   <div class="brand" style="padding-top:calc(12px + env(safe-area-inset-top));">
-    <img class="logo photo" src="assets/logo_header.jpg" alt="Logo medico ecografo">
+    <img class="logo photo" src="assets/logo_header.jpg" alt="Logo">
     <div class="title">
       <h1>Funzione Diastolica Nuragica</h1>
       <p class="subtitle">Calcolatori per LAP e grading</p>
@@ -36,7 +36,7 @@
         <h2>Ritmo sinusale</h2>
         <button class="ghost" data-reset="sinus">Reset</button>
       </div>
-      <p class="hint">Inserisci i parametri principali. L’età è obbligatoria per le soglie di e′.</p>
+      <p class="hint">Età obbligatoria per le soglie di e′. L’e′ media ed E/e′ media sono calcolate automaticamente.</p>
       <div class="grid grid-iphone">
         <div class="field"><label>Età (anni)</label><input type="number" inputmode="numeric" id="sin_age" /></div>
         <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="sin_e_sept" /></div>
@@ -73,7 +73,7 @@
         <h2>Fibrillazione atriale</h2>
         <button class="ghost" data-reset="af">Reset</button>
       </div>
-      <p class="hint">Criteri: E≥100, E/e′ settale&gt;11, TR≥2.8 o PASP≥35, DT≤160 (≥2/4 → LAP↑).</p>
+      <p class="hint">LAP↑ se ≥2/4: E≥100, E/e′ sept&gt;11, TR≥2.8 o PASP≥35, DT≤160.</p>
       <div class="grid grid-iphone">
         <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="af_E" /></div>
         <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="af_e_sept" /></div>
@@ -104,7 +104,7 @@
       </div>
 
       <section id="sp_valv" class="subpanel hidden">
-        <p class="hint">MR severa, MS o MAC: privilegia indicatori alternativi.</p>
+        <p class="hint">MR severa, MS o MAC: privilegia indicatori alternativi (E/e′ standard può essere inattendibile).</p>
         <div class="grid grid-iphone">
           <div class="field"><label>MR severa?</label><select id="valv_mr"><option value="no">No</option><option value="si">Sì</option></select></div>
           <div class="field"><label>MS presente?</label><select id="valv_ms"><option value="no">No</option><option value="si">Sì</option></select></div>
@@ -118,13 +118,16 @@
           <div class="field"><label>PASP (mmHg)</label><input type="number" inputmode="numeric" id="valv_PASP" /></div>
           <div class="field"><label>LAVi (mL/m²)</label><input type="number" inputmode="decimal" id="valv_lavi" /></div>
           <div class="field"><label>LARS (%)</label><input type="number" inputmode="decimal" id="valv_lars" /></div>
+          <div class="field"><label>L-wave (cm/s)</label><input type="number" inputmode="decimal" id="valv_lwave" /></div>
+          <div class="field"><label>PR end-diastolica (m/s)</label><input type="number" inputmode="decimal" id="valv_pr_ed" /></div>
+          <div class="field"><label>PADP (mmHg)</label><input type="number" inputmode="numeric" id="valv_padp" /></div>
         </div>
         <div class="actions sticky"><button class="primary" id="valv_calc">Calcola</button></div>
         <div class="result" id="valv_result"></div>
       </section>
 
       <section id="sp_htx" class="subpanel hidden">
-        <p class="hint">E/e′ medio &lt;7 normale, &gt;14 aumentato; 7–14 → E/SRIVR (200 cm) o TR.</p>
+        <p class="hint">E/e′ medio: &lt;7 normale; &gt;14 aumentato; 7–14 → integra con TR/PASP o E/SRIVR ≈200 cm.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="htx_E" /></div>
           <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="htx_e_sept" /></div>
@@ -137,7 +140,7 @@
       </section>
 
       <section id="sp_ph" class="subpanel hidden">
-        <p class="hint">Variabile guida: E/e′ laterale. Integra con E/A, LARS, LAVi.</p>
+        <p class="hint">PH: guida E/e′ laterale. In zona 8–13 integra con E/A, LAVi, LARS per distinguere post- vs pre-capillare.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="ph_E" /></div>
           <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="ph_e_lat" /></div>
@@ -150,7 +153,7 @@
       </section>
 
       <section id="sp_av" class="subpanel hidden">
-        <p class="hint">Se fusione E/A o sola E → usa TR/PASP; altrimenti E/e′ con cautela.</p>
+        <p class="hint">E/A non interpretabile (fusione/solo E) → usa TR/PASP; E/e′ con cautela.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>E e A separabili?</label><select id="av_sep"><option value="si">Sì</option><option value="no">No (fusione)</option></select></div>
           <div class="field"><label>Solo onda E?</label><select id="av_onlyE"><option value="no">No</option><option value="si">Sì</option></select></div>
@@ -165,7 +168,7 @@
       </section>
 
       <section id="sp_rcm" class="subpanel hidden">
-        <p class="hint">Pattern restrittivo: E/A&gt;2.5, DT&lt;150, IVRT&lt;50.</p>
+        <p class="hint">Pattern restrittivo avanzato: E/A&gt;2,5, DT&lt;150 ms, IVRT&lt;50 ms, e′ molto bassa.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>E/A</label><input type="number" inputmode="decimal" id="rcm_EA" /></div>
           <div class="field"><label>DT (ms)</label><input type="number" inputmode="numeric" id="rcm_DT" /></div>
@@ -178,7 +181,7 @@
       </section>
 
       <section id="sp_cp" class="subpanel hidden">
-        <p class="hint">Differenziale con restrizione: variazioni respiratorie, HV reversal, annulus reversus.</p>
+        <p class="hint">Costrizione: variazioni respiratorie, HV reversal, annulus/strain reversus.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>Variazione mitrale con respiro (%)</label><input type="number" inputmode="numeric" id="cp_mitral_var" /></div>
           <div class="field"><label>Variazione tricuspide con respiro (%)</label><input type="number" inputmode="numeric" id="cp_tric_var" /></div>
@@ -191,7 +194,7 @@
       </section>
 
       <section id="sp_hcm" class="subpanel hidden">
-        <p class="hint">LAP multiparametriche; grading via E/A.</p>
+        <p class="hint">HCM: LAP↑ se ≥2 tra E/e′ medio≥14, TR/PASP↑, PV S/D≤0,67, LAVi&gt;34; grading via E/A.</p>
         <div class="grid grid-iphone">
           <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="hcm_E" /></div>
           <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="hcm_e_sept" /></div>
@@ -221,6 +224,6 @@
   <p>© Funzione Diastolica Nuragica — uso clinico a discrezione medica.</p>
 </footer>
 
-<script src="app.js"></script>
+<script src="app.js?v=31b"></script>
 </body>
 </html>

@@ -29,7 +29,7 @@ main{padding:12px;max-width:980px;margin:0 auto}
 @media (max-width:420px){.grid-iphone{grid-template-columns:1fr}}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-size:13px;color:#4b5563}
-.field input,.field select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:#ffffff;color:var(--text);min-height:44px}
+.field input,.field select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:#ffffff;color:#1f2937;min-height:44px}
 .field input:focus{outline:2px solid rgba(6,182,212,.25)}
 .inline-msg{font-size:12px;margin-top:4px}
 .inline-msg.warn{color:#b45309}
