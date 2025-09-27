@@ -2,228 +2,51 @@
 <html lang="it">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="white" />
   <title>Funzione Diastolica Nuragica</title>
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="icon" href="assets/favicon.png" type="image/png"/>
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png"/>
-  <link rel="stylesheet" href="styles.css?v=31b" />
+  <link rel="icon" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles.css?v=32b" />
 </head>
 <body>
-<header class="app-header">
-  <div class="brand" style="padding-top:calc(12px + env(safe-area-inset-top));">
-    <img class="logo photo" src="assets/logo_header.jpg" alt="Logo">
-    <div class="title">
-      <h1>Funzione Diastolica Nuragica</h1>
-      <p class="subtitle">Calcolatori per LAP e grading</p>
+  <header class="nav">
+    <div class="nav-row">
+      <div class="title-wrap">
+        <img class='logo' src='assets/logo.jpg' alt='logo'/>
+        <div>
+          <div class="overline">Calcolatori ecocardiografici</div>
+          <h1 class="title">Funzione Diastolica Nuragica</h1>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="copyBtn" class="btn ghost" title="Copia referto">Copia</button>
+        <button id="resetBtn" class="btn" title="Reset">Reset</button>
+      </div>
     </div>
-  </div>
-  <nav class="tabs" id="tabs">
-    <button data-target="sinus">Ritmo sinusale</button>
-    <button data-target="af">Fibrillazione atriale</button>
-    <button data-target="special">Popolazioni speciali</button>
-    <button data-target="about">Info</button>
-  </nav>
-</header>
-
-<main id="content">
-  <!-- SINUS -->
-  <section id="sinus" class="panel hidden">
-    <div class="card">
-      <div class="card-header">
-        <h2>Ritmo sinusale</h2>
-        <button class="ghost" data-reset="sinus">Reset</button>
-      </div>
-      <p class="hint">Età obbligatoria per le soglie di e′. L’e′ media ed E/e′ media sono calcolate automaticamente.</p>
-      <div class="grid grid-iphone">
-        <div class="field"><label>Età (anni)</label><input type="number" inputmode="numeric" id="sin_age" /></div>
-        <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="sin_e_sept" /></div>
-        <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="sin_e_lat" /></div>
-        <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="sin_E" /></div>
-        <div class="field"><label>E/A</label><input type="number" inputmode="decimal" id="sin_EA" /></div>
-        <div class="field"><label>TR (m/s)</label><input type="number" inputmode="decimal" id="sin_TR" /></div>
-        <div class="field"><label>PASP (mmHg)</label><input type="number" inputmode="numeric" id="sin_PASP" /></div>
-        <div class="field"><label>LAVi (mL/m²)</label><input type="number" inputmode="decimal" id="sin_lavi" /></div>
-      </div>
-      <details class="extras">
-        <summary>Metodi di supporto</summary>
-        <div class="grid grid-iphone">
-          <div class="field"><label>PV S/D</label><input type="number" inputmode="decimal" id="sin_pv_sd" /></div>
-          <div class="field"><label>LARS (%)</label><input type="number" inputmode="decimal" id="sin_lars" /></div>
-          <div class="field"><label>IVRT (ms)</label><input type="number" inputmode="numeric" id="sin_ivrt" /></div>
-          <div class="field"><label>Ar–A PV (ms)</label><input type="number" inputmode="numeric" id="sin_ar_a" /></div>
-          <div class="field"><label>L-wave (cm/s)</label><input type="number" inputmode="decimal" id="sin_lwave" /></div>
-          <div class="field"><label>PR end-diastolica (m/s)</label><input type="number" inputmode="decimal" id="sin_pr_ed" /></div>
-          <div class="field"><label>PADP (mmHg)</label><input type="number" inputmode="numeric" id="sin_padp" /></div>
-        </div>
-      </details>
-      <div class="actions sticky">
-        <button class="primary" id="sin_calc">Calcola</button>
-      </div>
-      <div class="result" id="sin_result"></div>
+    <div class="segmented" id="tabs">
+      <button data-view="sinus" class="seg active">Ritmo sinusale</button>
+      <button data-view="af" class="seg">Fibrillazione atriale</button>
+      <button data-view="valv" class="seg">Valvulopatie</button>
+      <button data-view="ph" class="seg">Ipertensione polmonare</button>
+      <button data-view="htx" class="seg">Trapianto</button>
+      <button data-view="lvad" class="seg">LVAD</button>
+      <button data-view="avb" class="seg">BAV/Pacing</button>
+      <button data-view="rcm" class="seg">Restrittiva</button>
+      <button data-view="cons" class="seg">Costrizione</button>
+      <button data-view="hcm" class="seg">HCM</button>
     </div>
-  </section>
+  </header>
 
-  <!-- AF -->
-  <section id="af" class="panel hidden">
-    <div class="card">
-      <div class="card-header">
-        <h2>Fibrillazione atriale</h2>
-        <button class="ghost" data-reset="af">Reset</button>
-      </div>
-      <p class="hint">LAP↑ se ≥2/4: E≥100, E/e′ sept&gt;11, TR≥2.8 o PASP≥35, DT≤160.</p>
-      <div class="grid grid-iphone">
-        <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="af_E" /></div>
-        <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="af_e_sept" /></div>
-        <div class="field"><label>TR (m/s)</label><input type="number" inputmode="decimal" id="af_TR" /></div>
-        <div class="field"><label>PASP (mmHg)</label><input type="number" inputmode="numeric" id="af_PASP" /></div>
-        <div class="field"><label>DT (ms)</label><input type="number" inputmode="numeric" id="af_DT" /></div>
-      </div>
-      <div class="actions sticky"><button class="primary" id="af_calc">Calcola</button></div>
-      <div class="result" id="af_result"></div>
-    </div>
-  </section>
+  <main id="view" class="view"></main>
 
-  <!-- SPECIAL POPULATIONS -->
-  <section id="special" class="panel hidden">
-    <div class="card">
-      <div class="card-header">
-        <h2>Popolazioni speciali</h2>
-        <button class="ghost" data-reset="special_all">Reset tutto</button>
-      </div>
-      <div class="tabs sub" id="spTabs">
-        <button data-target="sp_valv">Valvulopatie</button>
-        <button data-target="sp_htx">Trapianto</button>
-        <button data-target="sp_ph">Ipertensione polmonare</button>
-        <button data-target="sp_av">AV/LBBB/Pacing</button>
-        <button data-target="sp_rcm">Restrittiva</button>
-        <button data-target="sp_cp">Costrizione</button>
-        <button data-target="sp_hcm">HCM</button>
-      </div>
+  <footer class="foot">
+    <div class="muted">Build 2025-09-27 15:05</div>
+    <div class="muted">Ottimizzata per iPhone · tema chiaro</div>
+  </footer>
 
-      <section id="sp_valv" class="subpanel hidden">
-        <p class="hint">MR severa, MS o MAC: privilegia indicatori alternativi (E/e′ standard può essere inattendibile).</p>
-        <div class="grid grid-iphone">
-          <div class="field"><label>MR severa?</label><select id="valv_mr"><option value="no">No</option><option value="si">Sì</option></select></div>
-          <div class="field"><label>MS presente?</label><select id="valv_ms"><option value="no">No</option><option value="si">Sì</option></select></div>
-          <div class="field"><label>MAC moderata/severa?</label><select id="valv_mac"><option value="no">No</option><option value="si">Sì</option></select></div>
-          <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="valv_E" /></div>
-          <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="valv_e_sept" /></div>
-          <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="valv_e_lat" /></div>
-          <div class="field"><label>Ar–A PV (ms)</label><input type="number" inputmode="numeric" id="valv_ar_a" /></div>
-          <div class="field"><label>PV S/D</label><input type="number" inputmode="decimal" id="valv_pv_sd" /></div>
-          <div class="field"><label>TR (m/s)</label><input type="number" inputmode="decimal" id="valv_TR" /></div>
-          <div class="field"><label>PASP (mmHg)</label><input type="number" inputmode="numeric" id="valv_PASP" /></div>
-          <div class="field"><label>LAVi (mL/m²)</label><input type="number" inputmode="decimal" id="valv_lavi" /></div>
-          <div class="field"><label>LARS (%)</label><input type="number" inputmode="decimal" id="valv_lars" /></div>
-          <div class="field"><label>L-wave (cm/s)</label><input type="number" inputmode="decimal" id="valv_lwave" /></div>
-          <div class="field"><label>PR end-diastolica (m/s)</label><input type="number" inputmode="decimal" id="valv_pr_ed" /></div>
-          <div class="field"><label>PADP (mmHg)</label><input type="number" inputmode="numeric" id="valv_padp" /></div>
-        </div>
-        <div class="actions sticky"><button class="primary" id="valv_calc">Calcola</button></div>
-        <div class="result" id="valv_result"></div>
-      </section>
-
-      <section id="sp_htx" class="subpanel hidden">
-        <p class="hint">E/e′ medio: &lt;7 normale; &gt;14 aumentato; 7–14 → integra con TR/PASP o E/SRIVR ≈200 cm.</p>
-        <div class="grid grid-iphone">
-          <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="htx_E" /></div>
-          <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="htx_e_sept" /></div>
-          <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="htx_e_lat" /></div>
-          <div class="field"><label>SRIVR (1/s)</label><input type="number" inputmode="decimal" id="htx_srivr" /></div>
-          <div class="field"><label>TR (m/s)</label><input type="number" inputmode="decimal" id="htx_TR" /></div>
-        </div>
-        <div class="actions sticky"><button class="primary" id="htx_calc">Calcola</button></div>
-        <div class="result" id="htx_result"></div>
-      </section>
-
-      <section id="sp_ph" class="subpanel hidden">
-        <p class="hint">PH: guida E/e′ laterale. In zona 8–13 integra con E/A, LAVi, LARS per distinguere post- vs pre-capillare.</p>
-        <div class="grid grid-iphone">
-          <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="ph_E" /></div>
-          <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="ph_e_lat" /></div>
-          <div class="field"><label>E/A</label><input type="number" inputmode="decimal" id="ph_EA" /></div>
-          <div class="field"><label>LARS (%)</label><input type="number" inputmode="decimal" id="ph_lars" /></div>
-          <div class="field"><label>LAVi (mL/m²)</label><input type="number" inputmode="decimal" id="ph_lavi" /></div>
-        </div>
-        <div class="actions sticky"><button class="primary" id="ph_calc">Calcola</button></div>
-        <div class="result" id="ph_result"></div>
-      </section>
-
-      <section id="sp_av" class="subpanel hidden">
-        <p class="hint">E/A non interpretabile (fusione/solo E) → usa TR/PASP; E/e′ con cautela.</p>
-        <div class="grid grid-iphone">
-          <div class="field"><label>E e A separabili?</label><select id="av_sep"><option value="si">Sì</option><option value="no">No (fusione)</option></select></div>
-          <div class="field"><label>Solo onda E?</label><select id="av_onlyE"><option value="no">No</option><option value="si">Sì</option></select></div>
-          <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="av_E" /></div>
-          <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="av_e_sept" /></div>
-          <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="av_e_lat" /></div>
-          <div class="field"><label>TR (m/s)</label><input type="number" inputmode="decimal" id="av_TR" /></div>
-          <div class="field"><label>PASP (mmHg)</label><input type="number" inputmode="numeric" id="av_PASP" /></div>
-        </div>
-        <div class="actions sticky"><button class="primary" id="av_calc">Calcola</button></div>
-        <div class="result" id="av_result"></div>
-      </section>
-
-      <section id="sp_rcm" class="subpanel hidden">
-        <p class="hint">Pattern restrittivo avanzato: E/A&gt;2,5, DT&lt;150 ms, IVRT&lt;50 ms, e′ molto bassa.</p>
-        <div class="grid grid-iphone">
-          <div class="field"><label>E/A</label><input type="number" inputmode="decimal" id="rcm_EA" /></div>
-          <div class="field"><label>DT (ms)</label><input type="number" inputmode="numeric" id="rcm_DT" /></div>
-          <div class="field"><label>IVRT (ms)</label><input type="number" inputmode="numeric" id="rcm_IVRT" /></div>
-          <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="rcm_e_sept" /></div>
-          <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="rcm_e_lat" /></div>
-        </div>
-        <div class="actions sticky"><button class="primary" id="rcm_calc">Calcola</button></div>
-        <div class="result" id="rcm_result"></div>
-      </section>
-
-      <section id="sp_cp" class="subpanel hidden">
-        <p class="hint">Costrizione: variazioni respiratorie, HV reversal, annulus/strain reversus.</p>
-        <div class="grid grid-iphone">
-          <div class="field"><label>Variazione mitrale con respiro (%)</label><input type="number" inputmode="numeric" id="cp_mitral_var" /></div>
-          <div class="field"><label>Variazione tricuspide con respiro (%)</label><input type="number" inputmode="numeric" id="cp_tric_var" /></div>
-          <div class="field"><label>Rapporto HV end-diastolico/anterogrado</label><input type="number" inputmode="decimal" id="cp_hv_ratio" /></div>
-          <div class="field"><label>e′ mediale (cm/s)</label><input type="number" inputmode="decimal" id="cp_e_medial" /></div>
-          <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="cp_e_lateral" /></div>
-        </div>
-        <div class="actions sticky"><button class="primary" id="cp_calc">Calcola</button></div>
-        <div class="result" id="cp_result"></div>
-      </section>
-
-      <section id="sp_hcm" class="subpanel hidden">
-        <p class="hint">HCM: LAP↑ se ≥2 tra E/e′ medio≥14, TR/PASP↑, PV S/D≤0,67, LAVi&gt;34; grading via E/A.</p>
-        <div class="grid grid-iphone">
-          <div class="field"><label>Picco E (cm/s)</label><input type="number" inputmode="decimal" id="hcm_E" /></div>
-          <div class="field"><label>e′ settale (cm/s)</label><input type="number" inputmode="decimal" id="hcm_e_sept" /></div>
-          <div class="field"><label>e′ laterale (cm/s)</label><input type="number" inputmode="decimal" id="hcm_e_lat" /></div>
-          <div class="field"><label>TR (m/s)</label><input type="number" inputmode="decimal" id="hcm_TR" /></div>
-          <div class="field"><label>PASP (mmHg)</label><input type="number" inputmode="numeric" id="hcm_PASP" /></div>
-          <div class="field"><label>PV S/D</label><input type="number" inputmode="decimal" id="hcm_pv_sd" /></div>
-          <div class="field"><label>LAVi (mL/m²)</label><input type="number" inputmode="decimal" id="hcm_lavi" /></div>
-          <div class="field"><label>E/A</label><input type="number" inputmode="decimal" id="hcm_EA" /></div>
-        </div>
-        <div class="actions sticky"><button class="primary" id="hcm_calc">Calcola</button></div>
-        <div class="result" id="hcm_result"></div>
-      </section>
-    </div>
-  </section>
-
-  <!-- INFO -->
-  <section id="about" class="panel hidden">
-    <div class="card">
-      <h2>Info</h2>
-      <p>App per stima della funzione diastolica secondo il documento condiviso. Nessun riferimento esplicito a società scientifiche.</p>
-    </div>
-  </section>
-</main>
-
-<footer class="app-footer" style="padding-bottom:calc(24px + env(safe-area-inset-bottom));">
-  <p>© Funzione Diastolica Nuragica — uso clinico a discrezione medica.</p>
-</footer>
-
-<script src="app.js?v=31b"></script>
+  <script src="scripts/algorithms.js?v=32b"></script>
+  <script src="scripts/app.js?v=32b"></script>
 </body>
 </html>
